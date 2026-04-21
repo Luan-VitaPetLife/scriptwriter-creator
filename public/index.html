@@ -84,7 +84,7 @@
     <div class="app-container">
         
         <div class="mobile-header">
-            <h5 class="m-0 fs-6 fw-bold">Coco and Luna Labs</h5>
+            <h5 class="m-0 fs-6 fw-bold">Coco and Luna</h5>
             <button class="btn btn-sm btn-outline-light" onclick="toggleMenu()">☰ Menu</button>
         </div>
 
@@ -92,7 +92,7 @@
 
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header d-flex justify-content-between align-items-center">
-                <h5 class="m-0 fs-6 fw-bold d-none d-md-block">Coco & Luna Labs</h5>
+                <h5 class="m-0 fs-6 fw-bold d-none d-md-block">Coco and Luna</h5>
                 <h5 class="m-0 fs-6 fw-bold d-md-none">Histórico</h5>
                 <button onclick="novaSessao()" class="btn btn-sm btn-outline-light fw-bold"> + Novo</button>
             </div>
@@ -299,7 +299,7 @@
                             
                             <div class="col-12 d-flex mobile-stack gap-2 mt-3">
                                 <button type="button" onclick="gerarAleatorio()" class="btn btn-random w-25 fw-bold text-nowrap">🎲 Aleatório</button>
-                                <button type="submit" class="btn btn-primary flex-grow-1 fw-bold">🚀 GERAR ROTEIRO</button>
+                                <button type="submit" class="btn btn-primary flex-grow-1 fw-bold"> GERAR ROTEIRO</button>
                             </div>
 
                             <div class="col-12 text-center mt-3">
@@ -313,11 +313,11 @@
                 </div>
 
                 <div id="painelRevisao" class="card p-5 d-none text-center">
-                    <h4 class="fw-bold mb-4">Confirmar Combinação? 🧠</h4>
+                    <h4 class="fw-bold mb-4">Confirmar Combinação?</h4>
                     <div class="text-start bg-light p-4 rounded mb-4 border" id="resumoCombinacao" style="font-size: 0.95rem;"></div>
                     <div class="d-flex mobile-stack gap-2">
                         <button onclick="voltarEdicao()" class="btn btn-light flex-grow-1 border fw-600">⬅️ Voltar</button>
-                        <button onclick="gerarAleatorio()" class="btn btn-outline-secondary flex-grow-1 fw-600">🔄 Girar Aleatório</button>
+                        <button onclick="gerarAleatorio()" class="btn btn-outline-secondary flex-grow-1 fw-600">🔄 Gerar aleatóriamente</button>
                         <button onclick="confirmarEnvio()" class="btn btn-primary flex-grow-1 fw-bold">✅ Confirmar</button>
                     </div>
                 </div>
@@ -370,11 +370,11 @@
 
         function revisarPedido() {
             const resumo = `
-                <div class="mb-2"><strong>🌍 Mercado:</strong> ${document.getElementById('mercado').value}</div>
-                <div class="mb-2"><strong>👤 Narrador:</strong> ${document.getElementById('narrador').value}</div>
-                <div class="mb-2"><strong>🎬 Formato:</strong> ${document.getElementById('formato').value}</div>
-                <div class="mb-2"><strong>📌 Tema:</strong> ${document.getElementById('tema').value}</div>
-                <div class="mb-2"><strong>🪝 Gancho:</strong> ${document.getElementById('gancho').value}</div>
+                <div class="mb-2"><strong> Mercado:</strong> ${document.getElementById('mercado').value}</div>
+                <div class="mb-2"><strong> Narrador:</strong> ${document.getElementById('narrador').value}</div>
+                <div class="mb-2"><strong> Formato:</strong> ${document.getElementById('formato').value}</div>
+                <div class="mb-2"><strong> Tema:</strong> ${document.getElementById('tema').value}</div>
+                <div class="mb-2"><strong> Gancho:</strong> ${document.getElementById('gancho').value}</div>
             `;
             document.getElementById('resumoCombinacao').innerHTML = resumo;
             document.getElementById('painelCriacao').classList.add('d-none');
