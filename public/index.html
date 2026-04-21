@@ -7,6 +7,10 @@
     <link rel="shortcut icon" href="./caneta-e-papel.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         :root {
             --brand-blue: #2B5FED;
@@ -15,38 +19,93 @@
             --sidebar-hover: #1f2937;
         }
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; height: 100vh; overflow: hidden; }
-        .app-container { display: flex; height: 100vh; }
-        .sidebar { width: 320px; background-color: var(--sidebar-bg); color: #f9fafb; display: flex; flex-direction: column; overflow-y: auto; z-index: 10; border-right: 1px solid #374151; }
+        .app-container { display: flex; height: 100vh; flex-direction: row; }
+        
+        /* Sidebar */
+        .sidebar { width: 320px; background-color: var(--sidebar-bg); color: #f9fafb; display: flex; flex-direction: column; overflow-y: auto; z-index: 100; border-right: 1px solid #374151; transition: all 0.3s ease; }
         .sidebar-header { padding: 24px 20px; border-bottom: 1px solid #374151; position: sticky; top: 0; background: var(--sidebar-bg); z-index: 11; }
         .historico-item { padding: 16px 20px; border-bottom: 1px solid #374151; cursor: pointer; transition: all 0.2s ease; }
         .historico-item:hover { background-color: var(--sidebar-hover); border-left: 4px solid var(--brand-blue); }
         .historico-titulo { font-size: 0.85rem; font-weight: 500; line-height: 1.2; }
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .historico-data { font-size: 0.75rem; color: #9ca3af; margin-top: 4px; }
+        
+        /* Main Content */
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; position: relative; }
         .max-w-custom { max-width: 900px; margin: 0 auto; }
         .card { border: none; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .form-label { font-weight: 600; color: #374151; font-size: 0.9rem; margin-bottom: 8px; }
-        .btn-primary { background-color: var(--brand-blue); border: none; border-radius: 8px; padding: 12px; }
-        .btn-random { background-color: #6366f1; color: white; border: none; border-radius: 8px; padding: 12px; }
-        #resultado { background: #fff; border-left: 4px solid var(--brand-blue); white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; }
+        .btn-primary { background-color: var(--brand-blue); border: none; border-radius: 8px; padding: 12px; transition: 0.2s; }
+        .btn-primary:hover { background-color: var(--brand-blue-hover); transform: translateY(-1px); }
+        .btn-random { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; transition: 0.2s; }
+        .btn-random:hover { background-color: #e2e8f0; color: var(--brand-blue); border-color: var(--brand-blue); }
+        
         optgroup { font-weight: bold; color: var(--brand-blue); }
+        
+        .api-info { font-size: 0.8rem; color: #6b7280; line-height: 1.4; display: block; margin-top: 10px; }
+
+        /* Estilização Markdown e Proteção de Quebra de Página no PDF */
+        .markdown-body { font-size: 0.95rem; line-height: 1.6; color: #1f2937; }
+        .markdown-body table { width: 100%; margin-bottom: 1rem; color: #212529; border-collapse: collapse; }
+        .markdown-body th, .markdown-body td { padding: 0.75rem; vertical-align: top; border: 1px solid #dee2e6; }
+        .markdown-body thead th { vertical-align: bottom; border-bottom: 2px solid #dee2e6; background-color: #f8f9fa; color: var(--brand-blue); }
+        .markdown-body ul, .markdown-body ol { padding-left: 20px; }
+
+        /* Classes vitais para consertar o PDF cortado */
+        .markdown-body p, 
+        .markdown-body li, 
+        .markdown-body tr, 
+        .markdown-body h1, 
+        .markdown-body h2, 
+        .markdown-body h3,
+        .markdown-body h4 { 
+            page-break-inside: avoid !important; 
+        }
+
+        /* Ajustes Mobile */
+        .mobile-header { display: none; background-color: var(--sidebar-bg); color: white; padding: 16px 20px; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 101;}
+        .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 50; transition: 0.3s; }
+
+        @media (max-width: 768px) {
+            body { overflow: auto; }
+            .app-container { flex-direction: column; height: auto; min-height: 100vh; }
+            .mobile-header { display: flex; position: sticky; top: 0; }
+            .sidebar { position: fixed; left: -320px; top: 0; bottom: 0; height: 100%; box-shadow: 4px 0 15px rgba(0,0,0,0.3); }
+            .sidebar.active { left: 0; }
+            .overlay.active { display: block; }
+            .main-content { padding: 20px 15px; }
+            .card { padding: 24px !important; }
+            .mobile-stack { flex-direction: column !important; width: 100%; gap: 10px; }
+            .mobile-stack button { width: 100% !important; margin: 0; }
+            h2 { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="sidebar">
+        
+        <div class="mobile-header">
+            <h5 class="m-0 fs-6 fw-bold">Coco and Luna Labs</h5>
+            <button class="btn btn-sm btn-outline-light" onclick="toggleMenu()">☰ Menu</button>
+        </div>
+
+        <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header d-flex justify-content-between align-items-center">
-                <h5 class="m-0 fs-6 fw-bold">Coco and Luna Labs</h5>
-                <button onclick="novaSessao()" class="btn btn-sm btn-outline-light"> + Novo</button>
+                <h5 class="m-0 fs-6 fw-bold d-none d-md-block">Coco & Luna Labs</h5>
+                <h5 class="m-0 fs-6 fw-bold d-md-none">Histórico</h5>
+                <button onclick="novaSessao()" class="btn btn-sm btn-outline-light fw-bold"> + Novo</button>
             </div>
             <div id="listaHistorico" class="flex-grow-1"></div>
         </div>
 
         <div class="main-content">
             <div class="container-fluid max-w-custom">
+                
                 <div class="card p-5 mb-4" id="painelCriacao">
                     <div class="text-center mb-5">
                         <h2 class="h3 fw-bold text-dark">Gerador de Roteiros Inteligente</h2>
-                        <p class="text-muted">Monte a combinação estratégica baseada no manual da marca.</p>
+                        <p class="text-muted d-none d-md-block">Monte a combinação estratégica baseada no manual da marca.</p>
                     </div>
                     
                     <form id="formRoteiro" onsubmit="event.preventDefault(); revisarPedido();">
@@ -211,11 +270,11 @@
                                         <option value="50. Se você não tem uma rotina de cuidados pra o seu cachorro comece com essa versão mínima.">50. Se você não tem uma rotina de cuidados pra o seu cachorro comece com essa versão mínima.</option>
                                     </optgroup>
                                     <optgroup label="Aspiracional & Identidade de Tutor">
-                                        <option value="51. Você PODE tener um cachorro senior saudável e feliz sem gastar uma fortuna no veterinário.">51. Você PODE tener um cachorro senior saudável e feliz sem gastar uma fortuna no veterinário.</option>
+                                        <option value="51. Você PODE ter um cachorro senior saudável e feliz sem gastar uma fortuna no veterinário.">51. Você PODE ter um cachorro senior saudável e feliz sem gastar uma fortuna no veterinário.</option>
                                         <option value="52. Existe uma diferença enorme entre um tutor iniciante e alguém que realmente entende de animais.">52. Existe uma diferença enorme entre um tutor iniciante e alguém que realmente entende de animais.</option>
                                         <option value="53. 5 coisas que os tutores de cachorro mais dedicados estão fazendo diferente em 2025.">53. 5 coisas que os tutores de cachorro mais dedicados estão fazendo diferente em 2025.</option>
                                         <option value="54. Essas são as 3 coisas que todo tutor responsável de gato deveria saber antes do gato completar 5 anos.">54. Essas são as 3 coisas que todo tutor responsável de gato deveria saber antes do gato completar 5 anos.</option>
-                                        <option value="55. Coisas que a gente não permite na rotina dos pets daqui - principalmente por conta do que sabe.">55. Coisas que a gente não permite na rotina dos pets daqui - principalmente por conta do que sabe. </option>
+                                        <option value="55. Coisas que a gente não permite na rotina dos pets daqui - principalmente por conta do que sabe.">55. Coisas que a gente não permite na rotina dos pets daqui - principalmente por conta do que sabe.</option>
                                         <option value="56. Coisas que a gente não compactua trabalhando com saúde animal há anos.">56. Coisas que a gente não compactua trabalhando com saúde animal há anos.</option>
                                     </optgroup>
                                     <optgroup label="Recomendações & Listas">
@@ -226,7 +285,7 @@
                                     <optgroup label="Urgência & Tempo">
                                         <option value="60. Se o seu cachorro tem 7 anos ou mais, essas são as 5 coisas que você precisa começar a fazer agora.">60. Se o seu cachorro tem 7 anos ou mais, essas são as 5 coisas que você precisa começar a fazer agora.</option>
                                         <option value="61. Ração seca ou ração úmida? Qual é melhor pra saúde dos rins do seu gato?">61. Ração seca ou ração úmida? Qual é melhor pra saúde dos rins do seu gato?</option>
-                                        <option value="62. Se o seu cachorro coça muito tem 3 coisas que você precisa verificar com urgência.">62. Se seu cachorro coça muito tem 3 coisas que você precisa verificar com urgência.</option>
+                                        <option value="62. Se o seu cachorro coça muito tem 3 coisas que você precisa verificar com urgência.">62. Se o seu cachorro coça muito tem 3 coisas que você precisa verificar com urgência.</option>
                                         <option value="63. Trocas inúteis que tutores de pet fazem o tempo todo e que não mudam nada na prática.">63. Trocas inúteis que tutores de pet fazem o tempo todo e que não mudam nada na prática.</option>
                                         <option value="64. Acabou de adotar um cachorro? Não pule essas 3 coisas na primeira semana.">64. Acabou de adotar um cachorro? Não pule essas 3 coisas na primeira semana. </option>
                                     </optgroup>
@@ -237,40 +296,52 @@
                                 <label class="form-label">Notas Adicionais</label>
                                 <textarea id="notas" class="form-control" rows="2" placeholder="Ex: Focar no produto L-Lysine..."></textarea>
                             </div>
-                            <div class="col-12 d-flex gap-2">
-                                <button type="button" onclick="gerarAleatorio()" class="btn btn-random w-25 fw-bold">🎲 Aleatório</button>
-                                <button type="submit" class="btn btn-primary flex-grow-1 fw-bold"> GERAR ROTEIRO</button>
+                            
+                            <div class="col-12 d-flex mobile-stack gap-2 mt-3">
+                                <button type="button" onclick="gerarAleatorio()" class="btn btn-random w-25 fw-bold text-nowrap">🎲 Aleatório</button>
+                                <button type="submit" class="btn btn-primary flex-grow-1 fw-bold">🚀 GERAR ROTEIRO</button>
                             </div>
-                            <small class="api-info">
-                                <strong>Nota Técnica:</strong> Este app utiliza a API Stateless do Claude (Anthropic). 
-                                Cada geração é independente para evitar mistura de informações e garantir criatividade infinita.
-                            </small>
+
+                            <div class="col-12 text-center mt-3">
+                                <small class="api-info">
+                                    Esse app utiliza a API do Claude Console (Anthropic) - Tokens são gastos por uso, sem limites diários pré-definidos.<br> 
+                                    A API é <i>Stateless</i>, que signifca que não tem memória passada, ou seja, todo roteiro gerado é novo, o que faz com que a IA não busque informações passadas e acabe misturando informações.
+                                </small>
+                            </div>
                         </div>
                     </form>
                 </div>
 
                 <div id="painelRevisao" class="card p-5 d-none text-center">
-                    <h4 class="fw-bold mb-4">Confirmar Combinação Inteligente? 🧠</h4>
-                    <div class="text-start bg-light p-4 rounded mb-4" id="resumoCombinacao"></div>
-                    <div class="d-flex gap-2">
-                        <button onclick="voltarEdicao()" class="btn btn-light flex-grow-1">⬅️ Voltar</button>
-                        <button onclick="gerarAleatorio()" class="btn btn-outline-secondary flex-grow-1">🔄 Gerar roteiro aleatório</button>
-                        <button onclick="confirmarEnvio()" class="btn btn-primary flex-grow-1 fw-bold">✅ Confirmar e Criar</button>
+                    <h4 class="fw-bold mb-4">Confirmar Combinação? 🧠</h4>
+                    <div class="text-start bg-light p-4 rounded mb-4 border" id="resumoCombinacao" style="font-size: 0.95rem;"></div>
+                    <div class="d-flex mobile-stack gap-2">
+                        <button onclick="voltarEdicao()" class="btn btn-light flex-grow-1 border fw-600">⬅️ Voltar</button>
+                        <button onclick="gerarAleatorio()" class="btn btn-outline-secondary flex-grow-1 fw-600">🔄 Girar Aleatório</button>
+                        <button onclick="confirmarEnvio()" class="btn btn-primary flex-grow-1 fw-bold">✅ Confirmar</button>
                     </div>
                 </div>
 
-                <div id="loading" class="text-center d-none my-5">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <h5 class="mt-3">Claude está escrevendo o roteiro...</h5>
+                <div id="loading" class="text-center d-none my-5 py-4">
+                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+                    <h5 class="mt-3 fw-bold">Claude está escrevendo o roteiro...</h5>
+                    <p class="text-muted small">Cruzando gatilhos e dados de produto</p>
                 </div>
 
-                <div id="resultadoContainer" class="card p-5 d-none">
-                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                        <h4 class="m-0 text-primary fw-bold" id="resultadoTitulo">✅ Roteiro Finalizado</h4>
-                        <button onclick="copiarTexto()" class="btn btn-outline-primary">📋 Copiar Roteiro</button>
+                <div id="resultadoContainer" class="card p-4 p-md-5 d-none shadow-sm">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 border-bottom pb-3 gap-3">
+                        <h4 class="m-0 text-primary fw-bold" id="resultadoTitulo">✅ Briefing Finalizado</h4>
+                        <div class="d-flex gap-2">
+                            <button onclick="copiarTexto()" class="btn btn-outline-primary fw-bold">📋 Copiar</button>
+                            <button onclick="exportarPDF()" class="btn btn-danger fw-bold">📄 Salvar PDF</button>
+                        </div>
                     </div>
-                    <div id="resultado" class="p-4 bg-light rounded text-dark"></div>
-                    <button onclick="novaSessao()" class="btn btn-link mt-3 text-muted text-decoration-none">← Gerar nova combinação</button>
+                    
+                    <div id="resultado" class="p-3 p-md-4 bg-light rounded text-dark markdown-body"></div>
+                    
+                    <div class="text-center mt-4">
+                        <button onclick="novaSessao()" class="btn btn-link text-muted text-decoration-none">← Gerar nova combinação</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -278,6 +349,11 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", carregarHistorico);
+
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
 
         function gerarAleatorio() {
             const selects = ['narrador', 'formato', 'tema', 'gancho'];
@@ -305,7 +381,6 @@
             document.getElementById('painelRevisao').classList.remove('d-none');
         }
 
-        // FUNÇÃO PARA VOLTAR SEM RESETAR OS CAMPOS
         function voltarEdicao() {
             document.getElementById('painelRevisao').classList.add('d-none');
             document.getElementById('painelCriacao').classList.remove('d-none');
@@ -336,11 +411,22 @@
                     body: JSON.stringify(dados)
                 });
                 const data = await response.json();
-                resDiv.innerText = data.roteiro;
+                
+                resDiv.innerHTML = marked.parse(data.roteiro);
+                
                 resContainer.classList.remove('d-none');
                 carregarHistorico();
+                
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: 'O roteiro foi gerado com a inteligência do Claude.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
             } catch (error) {
-                alert('Erro ao gerar. Verifique o console.');
+                Swal.fire('Erro!', 'Falha ao comunicar com a API.', 'error');
                 novaSessao();
             } finally {
                 loading.classList.add('d-none');
@@ -357,7 +443,10 @@
                 roteiros.forEach(rot => {
                     const div = document.createElement('div');
                     div.className = 'historico-item';
-                    div.onclick = () => exibirRoteiroSalvo(rot);
+                    div.onclick = () => {
+                        exibirRoteiroSalvo(rot);
+                        if(window.innerWidth <= 768) toggleMenu();
+                    };
                     const tituloCurto = rot.tema.split(' — ')[0];
                     div.innerHTML = `
                         <div class="historico-titulo fw-bold">${tituloCurto}</div>
@@ -374,7 +463,9 @@
             document.getElementById('painelCriacao').classList.add('d-none');
             document.getElementById('painelRevisao').classList.add('d-none');
             document.getElementById('resultadoContainer').classList.remove('d-none');
-            document.getElementById('resultado').innerText = rot.conteudo;
+            
+            document.getElementById('resultado').innerHTML = marked.parse(rot.conteudo);
+            document.getElementById('resultadoTitulo').innerText = "🕒 Roteiro Salvo";
         }
 
         function novaSessao() {
@@ -382,10 +473,41 @@
             document.getElementById('painelRevisao').classList.add('d-none');
             document.getElementById('painelCriacao').classList.remove('d-none');
             document.getElementById('formRoteiro').reset();
+            
+            if(window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('active')) {
+                toggleMenu();
+            }
         }
 
         function copiarTexto() {
-            navigator.clipboard.writeText(document.getElementById('resultado').innerText).then(() => alert('Roteiro copiado!'));
+            const textoParaCopiar = document.getElementById('resultado').innerText;
+            navigator.clipboard.writeText(textoParaCopiar).then(() => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Copiado!',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            });
+        }
+
+        // FUNÇÃO DE PDF CORRIGIDA COM PAGE-BREAKS
+        function exportarPDF() {
+            const elemento = document.getElementById('resultado');
+            
+            const opt = {
+                margin:       [15, 15, 15, 15], // Margens maiores pra não cortar as bordas
+                filename:     'Roteiro_CocoAndLuna.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                // Esta é a regra de ouro que evita que linhas sejam cortadas no meio
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } 
+            };
+
+            html2pdf().set(opt).from(elemento).save();
         }
     </script>
 </body>
