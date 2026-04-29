@@ -7,7 +7,7 @@ const path = require('path');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); 
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 1. Conexão com MongoDB
@@ -15,19 +15,27 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Conectado"))
   .catch(err => console.error("❌ Erro MongoDB:", err));
 
+// Modelos do Banco de Dados
 const RoteiroSchema = new mongoose.Schema({
-  mercado: String,
-  tema: String,
-  conteudo: String,
-  dataCriacao: { type: Date, default: Date.now }
+  mercado: String, tema: String, conteudo: String, dataCriacao: { type: Date, default: Date.now }
 });
 const Roteiro = mongoose.model('Roteiro', RoteiroSchema);
 
-// 2. Configuração da Anthropic com o modelo do seu painel
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+const ConfigSchema = new mongoose.Schema({
+  mercados: [String], narradores: [String], formatos: [String], temas: [String], ganchos: [String]
 });
+const Config = mongoose.model('Config', ConfigSchema);
 
+const LixeiraSchema = new mongoose.Schema({
+  categoria: String,
+  valor: String,
+  dataExclusao: { type: Date, default: Date.now, expires: 864000 } 
+});
+const Lixeira = mongoose.model('Lixeira', LixeiraSchema);
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// NOVO PROMPT OFICIAL E COMPLETO
 const SYSTEM_PROMPT = `
 Identidade O que você é
 Você é um gerador inteligente de roteiros para redes sociais da Coco and Luna. Funciona como um
@@ -368,50 +376,114 @@ Quando aprovado, monte o briefing completo. Responda DIRETAMENTE com o Roteiro e
 | 2 | ... | ... | ... | ... | ... | ... |
 | ... | ... | ... | ... | ... | ... | ... |
 `;
+
+// ==========================================
+// ROTAS DE GERAÇÃO E HISTÓRICO
+// ==========================================
 app.post('/api/gerar', async (req, res) => {
   try {
-    const { mercado, narrador, formato, tema, gancho, notas } = req.body;
+    const { mercado, narrador, formato, tema, gancho, notas, anexo } = req.body;
+
+    const contentArray = [
+      { 
+        type: "text", 
+        text: `GERAR ROTEIRO.\nMercado: ${mercado}\nQuem aparece: ${narrador}\nFormato: ${formato}\nTema: ${tema}\nGancho: ${gancho}\nNotas: ${notas}` 
+      }
+    ];
+
+    if (anexo && anexo.base64) {
+      const base64Data = anexo.base64.split(',')[1];
+      const mimeType = anexo.tipo.toLowerCase();
+
+      if (mimeType.startsWith('image/')) {
+        contentArray.push({ type: "image", source: { type: "base64", media_type: mimeType, data: base64Data } });
+      } else if (mimeType === 'application/pdf') {
+        contentArray.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: base64Data } });
+      } else {
+        const textContent = Buffer.from(base64Data, 'base64').toString('utf-8');
+        contentArray[0].text += `\n\n--- DOCUMENTO DE REFERÊNCIA ANEXADO (${anexo.nome}) ---\n${textContent}`;
+      }
+    }
 
     const response = await anthropic.messages.create({
-      model: "claude-opus-4-7", // Atualizado conforme seu Workbench
-      max_tokens: 2500, // Garante que a tabela de briefing não venha cortada
-      system: SYSTEM_PROMPT,
-      messages: [
-        { 
-          role: "user", 
-          content: `GERAR ROTEIRO. Mercado: ${mercado}. Quem aparece: ${narrador}. Formato: ${formato}. Tema: ${tema}. Gancho: ${gancho}. Notas: ${notas}` 
-        }
-      ],
+      model: "claude-opus-4-7", max_tokens: 2500, system: SYSTEM_PROMPT, messages: [{ role: "user", content: contentArray }]
     });
 
     const textoRoteiro = response.content[0].text;
-
-    const novoRoteiro = new Roteiro({
-      mercado,
-      tema,
-      conteudo: textoRoteiro
-    });
+    const novoRoteiro = new Roteiro({ mercado, tema, conteudo: textoRoteiro });
     await novoRoteiro.save();
 
     res.json({ roteiro: textoRoteiro });
   } catch (error) {
-    console.error("❌ Erro na IA:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
 app.get('/api/historico', async (req, res) => {
-  try {
-    const historico = await Roteiro.find().sort({ dataCriacao: -1 }).limit(10);
-    res.json(historico);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  try { res.json(await Roteiro.find().sort({ dataCriacao: -1 })); } 
+  catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// ==========================================
+// ROTAS DE CONFIGURAÇÕES (CRUD)
+// ==========================================
+app.get('/api/configuracoes', async (req, res) => {
+  try {
+    let config = await Config.findOne();
+    if (!config) config = await Config.create({ mercados: [], narradores: [], formatos: [], temas: [], ganchos: [] });
+    res.json(config);
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
+
+app.post('/api/configuracoes', async (req, res) => {
+  try {
+    let config = await Config.findOne();
+    if (config) {
+      config.mercados = req.body.mercados; config.narradores = req.body.narradores; config.formatos = req.body.formatos; config.temas = req.body.temas; config.ganchos = req.body.ganchos;
+      await config.save();
+    } else { config = await Config.create(req.body); }
+    res.json({ success: true, config });
+  } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+// ==========================================
+// ROTAS DA LIXEIRA (SOFT DELETE)
+// ==========================================
+app.post('/api/lixeira', async (req, res) => {
+  try {
+    const { categoria, valor } = req.body;
+    await Lixeira.create({ categoria, valor });
+    res.json({ success: true });
+  } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.get('/api/lixeira', async (req, res) => {
+  try { res.json(await Lixeira.find().sort({ dataExclusao: -1 })); } 
+  catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.post('/api/lixeira/restaurar/:id', async (req, res) => {
+  try {
+    const item = await Lixeira.findById(req.params.id);
+    if (item) {
+      const config = await Config.findOne();
+      if(config && config[item.categoria]) {
+        config[item.categoria].push(item.valor);
+        await config.save();
+      }
+      await Lixeira.findByIdAndDelete(req.params.id);
+    }
+    res.json({ success: true });
+  } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.delete('/api/lixeira/:id', async (req, res) => {
+  try { await Lixeira.findByIdAndDelete(req.params.id); res.json({ success: true }); } 
+  catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+// Front-end principal
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Sistema Online na porta ${PORT}`));

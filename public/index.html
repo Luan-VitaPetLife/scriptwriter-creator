@@ -12,24 +12,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        :root {
-            --brand-blue: #2B5FED;
-            --brand-blue-hover: #1e45b3;
-            --sidebar-bg: #111827;
-            --sidebar-hover: #1f2937;
-        }
+        :root { --brand-blue: #2B5FED; --brand-blue-hover: #1e45b3; --sidebar-bg: #111827; --sidebar-hover: #1f2937; }
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100vh; flex-direction: row; }
-        
-        /* Sidebar */
         .sidebar { width: 320px; background-color: var(--sidebar-bg); color: #f9fafb; display: flex; flex-direction: column; overflow-y: auto; z-index: 100; border-right: 1px solid #374151; transition: all 0.3s ease; }
         .sidebar-header { padding: 24px 20px; border-bottom: 1px solid #374151; position: sticky; top: 0; background: var(--sidebar-bg); z-index: 11; }
         .historico-item { padding: 16px 20px; border-bottom: 1px solid #374151; cursor: pointer; transition: all 0.2s ease; }
         .historico-item:hover { background-color: var(--sidebar-hover); border-left: 4px solid var(--brand-blue); }
         .historico-titulo { font-size: 0.85rem; font-weight: 500; line-height: 1.2; }
         .historico-data { font-size: 0.75rem; color: #9ca3af; margin-top: 4px; }
-        
-        /* Main Content */
         .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; position: relative; }
         .max-w-custom { max-width: 900px; margin: 0 auto; }
         .card { border: none; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
@@ -38,31 +29,16 @@
         .btn-primary:hover { background-color: var(--brand-blue-hover); transform: translateY(-1px); }
         .btn-random { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; transition: 0.2s; }
         .btn-random:hover { background-color: #e2e8f0; color: var(--brand-blue); border-color: var(--brand-blue); }
-        
         optgroup { font-weight: bold; color: var(--brand-blue); }
-        
         .api-info { font-size: 0.8rem; color: #6b7280; line-height: 1.4; display: block; margin-top: 10px; }
-
-        /* Estilização Markdown e Proteção de Quebra de Página no PDF */
+        
         .markdown-body { font-size: 0.95rem; line-height: 1.6; color: #1f2937; }
-        .markdown-body table { width: 100%; margin-bottom: 1rem; color: #212529; border-collapse: collapse; }
+        .markdown-body table { width: 100%; margin-bottom: 1rem; border-collapse: collapse; }
         .markdown-body th, .markdown-body td { padding: 0.75rem; vertical-align: top; border: 1px solid #dee2e6; }
-        .markdown-body thead th { vertical-align: bottom; border-bottom: 2px solid #dee2e6; background-color: #f8f9fa; color: var(--brand-blue); }
-        .markdown-body ul, .markdown-body ol { padding-left: 20px; }
-
-        /* Classes vitais para consertar o PDF cortado */
-        .markdown-body p, 
-        .markdown-body li, 
-        .markdown-body tr, 
-        .markdown-body h1, 
-        .markdown-body h2, 
-        .markdown-body h3,
-        .markdown-body h4 { 
-            page-break-inside: avoid !important; 
-        }
-
-        /* Ajustes Mobile */
-        .mobile-header { display: none; background-color: var(--sidebar-bg); color: white; padding: 16px 20px; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 101;}
+        .markdown-body thead th { background-color: #f8f9fa; color: var(--brand-blue); }
+        .markdown-body p, .markdown-body li, .markdown-body tr, .markdown-body h1, .markdown-body h2 { page-break-inside: avoid !important; }
+        
+        .mobile-header { display: none; background-color: var(--sidebar-bg); color: white; padding: 16px 20px; align-items: center; justify-content: space-between; z-index: 101;}
         .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 50; transition: 0.3s; }
 
         @media (max-width: 768px) {
@@ -76,7 +52,6 @@
             .card { padding: 24px !important; }
             .mobile-stack { flex-direction: column !important; width: 100%; gap: 10px; }
             .mobile-stack button { width: 100% !important; margin: 0; }
-            h2 { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -84,18 +59,25 @@
     <div class="app-container">
         
         <div class="mobile-header">
-            <h5 class="m-0 fs-6 fw-bold">Coco and Luna</h5>
+            <h5 class="m-0 fs-6 fw-bold">Coco and Luna Labs</h5>
             <button class="btn btn-sm btn-outline-light" onclick="toggleMenu()">☰ Menu</button>
         </div>
-
         <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header d-flex justify-content-between align-items-center">
-                <h5 class="m-0 fs-6 fw-bold d-none d-md-block">Coco and Luna</h5>
-                <h5 class="m-0 fs-6 fw-bold d-md-none">Histórico</h5>
+                <h5 class="m-0 fs-6 fw-bold d-none d-md-block">Coco and Luna - Roteiros</h5>
                 <button onclick="novaSessao()" class="btn btn-sm btn-outline-light fw-bold"> + Novo</button>
             </div>
+            
+            <div class="p-3 border-bottom border-secondary" style="background-color: rgba(0,0,0,0.2);">
+                <button onclick="abrirConfiguracoes()" class="btn btn-sm btn-outline-secondary w-100 text-light mb-3">⚙️ Configurações</button>
+                <div class="form-group">
+                    <label class="form-label text-muted small mb-1">Pesquisar por data:</label>
+                    <input type="date" id="filtroDataHistorico" class="form-control form-control-sm bg-dark text-light border-secondary" onchange="carregarHistorico()">
+                </div>
+            </div>
+
             <div id="listaHistorico" class="flex-grow-1"></div>
         </div>
 
@@ -104,8 +86,7 @@
                 
                 <div class="card p-5 mb-4" id="painelCriacao">
                     <div class="text-center mb-5">
-                        <h2 class="h3 fw-bold text-dark">Gerador de Roteiros Inteligente</h2>
-                        <p class="text-muted d-none d-md-block">Monte a combinação estratégica baseada no manual da marca.</p>
+                        <h2 class="h3 fw-bold text-dark">Gerador de Roteiros</h2>
                     </div>
                     
                     <form id="formRoteiro" onsubmit="event.preventDefault(); revisarPedido();">
@@ -113,8 +94,8 @@
                             <div class="col-md-4">
                                 <label class="form-label">Mercado</label>
                                 <select id="mercado" class="form-select bg-light">
-                                    <option value="Brasil">Brasil BR 🇧🇷</option>
-                                    <option value="EUA">EUA US 🇺🇸</option>
+                                    <option value="Brasil BR 🇧🇷">Brasil BR</option>
+                                    <option value="EUA US 🇺🇸">EUA US</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
@@ -141,7 +122,7 @@
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Tema Principal (34 Opções)</label>
+                                <label class="form-label">Tema Principal</label>
                                 <select id="tema" class="form-select" required>
                                     <option value="" disabled selected>Selecione um tema mapeado...</option>
                                     <optgroup label="Humor / Identificação">
@@ -202,7 +183,7 @@
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Gancho de Abertura (64 Opções)</label>
+                                <label class="form-label">Gancho de Abertura</label>
                                 <select id="gancho" class="form-select" required>
                                     <option value="" disabled selected>Selecione um gancho validado...</option>
                                     <optgroup label="Segredos & Truques">
@@ -293,39 +274,92 @@
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Notas Adicionais</label>
+                                <label class="form-label d-flex justify-content-between align-items-center w-100 mb-2">
+                                    Notas Adicionais
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle fw-bold" style="width: 28px; height: 28px; padding: 0; line-height: 0;" onclick="document.getElementById('anexoInput').click()" title="Adicionar qualquer anexo (Imagem, PDF, Documento)">+</button>
+                                </label>
                                 <textarea id="notas" class="form-control" rows="2" placeholder="Ex: Focar no produto L-Lysine..."></textarea>
+                                
+                                <input type="file" id="anexoInput" class="d-none">
+                                <div id="anexoPreview" class="small text-muted mt-2 d-none p-2 bg-white border rounded"></div>
                             </div>
                             
                             <div class="col-12 d-flex mobile-stack gap-2 mt-3">
                                 <button type="button" onclick="gerarAleatorio()" class="btn btn-random w-25 fw-bold text-nowrap">🎲 Aleatório</button>
-                                <button type="submit" class="btn btn-primary flex-grow-1 fw-bold"> GERAR ROTEIRO</button>
-                            </div>
-
-                            <div class="col-12 text-center mt-3">
-                                <small class="api-info">
-                                    Esse app utiliza a API do Claude Console (Anthropic) - Tokens são gastos por uso, sem limites diários pré-definidos.<br> 
-                                    A API é <i>Stateless</i>, que signifca que não tem memória passada, ou seja, todo roteiro gerado é novo, o que faz com que a IA não busque informações passadas e acabe misturando informações.
-                                </small>
+                                <button type="submit" class="btn btn-primary flex-grow-1 fw-bold">🚀 GERAR ROTEIRO</button>
                             </div>
                         </div>
                     </form>
                 </div>
 
                 <div id="painelRevisao" class="card p-5 d-none text-center">
-                    <h4 class="fw-bold mb-4">Confirmar Combinação?</h4>
+                    <h4 class="fw-bold mb-4">Confirmar Combinação? 🧠</h4>
                     <div class="text-start bg-light p-4 rounded mb-4 border" id="resumoCombinacao" style="font-size: 0.95rem;"></div>
                     <div class="d-flex mobile-stack gap-2">
                         <button onclick="voltarEdicao()" class="btn btn-light flex-grow-1 border fw-600">⬅️ Voltar</button>
-                        <button onclick="gerarAleatorio()" class="btn btn-outline-secondary flex-grow-1 fw-600">🔄 Gerar aleatóriamente</button>
+                        <button onclick="gerarAleatorio()" class="btn btn-outline-secondary flex-grow-1 fw-600">🔄 Girar Aleatório</button>
                         <button onclick="confirmarEnvio()" class="btn btn-primary flex-grow-1 fw-bold">✅ Confirmar</button>
                     </div>
                 </div>
 
+                <div id="painelConfiguracoes" class="card p-5 d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                        <h4 class="m-0 text-dark fw-bold">⚙️ Gerir Opções</h4>
+                        <div>
+                            <button onclick="abrirLixeira()" class="btn btn-outline-danger me-3 fw-bold">🗑️ Lixeira</button>
+                            <button onclick="novaSessao()" class="btn btn-close"></button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-light p-4 rounded border mb-5" id="areaFormNovaOpcao">
+                        <h6 class="text-success fw-bold mb-3" id="tituloFormOpcao">➕ Adicionar Nova Opção</h6>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label small">Categoria</label>
+                                <select id="novoTipo" class="form-select border-success">
+                                    <option value="mercados">Mercado</option>
+                                    <option value="narradores">Narrador</option>
+                                    <option value="formatos">Formato</option>
+                                    <option value="temas">Tema Principal</option>
+                                    <option value="ganchos">Gancho de Abertura</option>
+                                </select>
+                            </div>
+                            <div class="col-md-9">
+                                <label class="form-label small">Título da Opção (O que aparece forte)</label>
+                                <input type="text" id="novoTitulo" class="form-control border-success" placeholder="Ex: Novo Gancho Visual">
+                            </div>
+                            <div class="col-md-10">
+                                <label class="form-label small">Explicação Estratégica (Contexto para a IA)</label>
+                                <textarea id="novaExplicacao" class="form-control border-success" rows="2" placeholder="Explique o que essa opção faz..."></textarea>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" id="btnInserirOpcao" onclick="adicionarNovoItem()" class="btn btn-success w-100 fw-bold h-100">Inserir</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold mb-3 text-secondary">Opções Cadastradas (Banco de Dados)</h6>
+                    
+                    <div class="row g-4">
+                        <div class="col-12"><label class="form-label text-muted m-0">Temas Extras</label><div id="listaTemas"></div></div>
+                        <div class="col-12"><label class="form-label text-muted m-0">Ganchos Extras</label><div id="listaGanchos"></div></div>
+                        <div class="col-md-4"><label class="form-label text-muted m-0">Mercados Extras</label><div id="listaMercados"></div></div>
+                        <div class="col-md-4"><label class="form-label text-muted m-0">Narradores Extras</label><div id="listaNarradores"></div></div>
+                        <div class="col-md-4"><label class="form-label text-muted m-0">Formatos Extras</label><div id="listaFormatos"></div></div>
+                    </div>
+                </div>
+
+                <div id="painelLixeira" class="card p-5 d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                        <h4 class="m-0 text-danger fw-bold">🗑️ Lixeira (Limpeza em 10 dias)</h4>
+                        <button onclick="abrirConfiguracoes()" class="btn btn-outline-secondary">⬅️ Voltar</button>
+                    </div>
+                    <div id="listaLixeira" class="list-group"></div>
+                </div>
+
                 <div id="loading" class="text-center d-none my-5 py-4">
-                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
-                    <h5 class="mt-3 fw-bold">Claude está escrevendo o roteiro...</h5>
-                    <p class="text-muted small">Cruzando gatilhos e dados de produto</p>
+                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+                    <h5 class="mt-3 fw-bold">Claude está trabalhando nisso...</h5>
                 </div>
 
                 <div id="resultadoContainer" class="card p-4 p-md-5 d-none shadow-sm">
@@ -336,45 +370,331 @@
                             <button onclick="exportarPDF()" class="btn btn-danger fw-bold">📄 Salvar PDF</button>
                         </div>
                     </div>
-                    
                     <div id="resultado" class="p-3 p-md-4 bg-light rounded text-dark markdown-body"></div>
-                    
                     <div class="text-center mt-4">
-                        <button onclick="novaSessao()" class="btn btn-link text-muted text-decoration-none">← Gerar nova combinação</button>
+                        <button onclick="novaSessao()" class="btn btn-link text-muted text-decoration-none">← Nova geração</button>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", carregarHistorico);
+        let anexoData = null;
+        let configGlobal = { mercados: [], narradores: [], formatos: [], temas: [], ganchos: [] };
+        let expandedCategories = { mercados: false, narradores: false, formatos: false, temas: false, ganchos: false };
+        let todosRoteirosCache = [];
+        let edicaoAtual = null; // Variável para controlar a edição
+
+        document.addEventListener("DOMContentLoaded", () => {
+            carregarConfiguracoes();
+            carregarHistorico();
+            
+            document.getElementById('anexoInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                if(file.size > 10 * 1024 * 1024) {
+                    Swal.fire('Aviso', 'O arquivo é muito grande (máx 10MB recomendado).', 'warning');
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    anexoData = { nome: file.name, tipo: file.type, base64: event.target.result };
+                    const preview = document.getElementById('anexoPreview');
+                    preview.innerHTML = `📎 <strong>Anexo adicionado:</strong> ${file.name} <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-3" onclick="removerAnexo()">Remover</button>`;
+                    preview.classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        function removerAnexo() {
+            anexoData = null;
+            document.getElementById('anexoInput').value = '';
+            document.getElementById('anexoPreview').classList.add('d-none');
+        }
 
         function toggleMenu() {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
         }
 
+        // ==========================================
+        // LÓGICA DE CONFIGURAÇÕES, LISTAS E EDIÇÃO
+        // ==========================================
+        async function carregarConfiguracoes() {
+            try {
+                const res = await fetch('/api/configuracoes');
+                configGlobal = await res.json();
+                
+                preencherSelectMisturado('mercado', configGlobal.mercados);
+                preencherSelectMisturado('narrador', configGlobal.narradores);
+                preencherSelectMisturado('formato', configGlobal.formatos);
+                preencherSelectMisturado('tema', configGlobal.temas);
+                preencherSelectMisturado('gancho', configGlobal.ganchos);
+
+                renderizarListasDeEdicao();
+            } catch (err) {}
+        }
+
+        function renderizarListasDeEdicao() {
+            ['mercados', 'narradores', 'formatos', 'temas', 'ganchos'].forEach(cat => atualizarDOMLista(cat));
+        }
+
+        function atualizarDOMLista(categoria) {
+            const array = configGlobal[categoria] || [];
+            const container = document.getElementById(`lista${categoria.charAt(0).toUpperCase() + categoria.slice(1)}`);
+            const isExpanded = expandedCategories[categoria];
+            const limit = 3;
+            let html = '';
+
+            if(array.length === 0) {
+                container.innerHTML = '<div class="p-3 mt-2 text-muted small text-center bg-white border rounded">Nenhum item da base de dados</div>';
+                return;
+            }
+
+            if (isExpanded) {
+                html += `<div class="mb-2 mt-2"><input type="text" class="form-control form-control-sm border-primary" placeholder="Pesquisar em ${categoria}..." onkeyup="filtrarListaDOM(this, 'items-${categoria}')"></div>`;
+            }
+
+            html += `<div class="${isExpanded ? 'rounded border p-1 bg-light mt-2' : 'mt-2'}" style="${isExpanded ? 'max-height: 250px; overflow-y: auto;' : ''}">`;
+            
+            array.forEach((item, index) => {
+                const partes = item.split(' — ');
+                const titulo = partes[0];
+                const explicacao = partes[1] ? `<span class="d-block text-muted" style="font-size: 0.75rem;">${partes[1]}</span>` : '';
+                const hideClass = (!isExpanded && index >= limit) ? 'd-none' : '';
+                
+                html += `
+                    <div class="p-2 bg-white d-flex justify-content-between align-items-center mb-1 rounded border items-${categoria} ${hideClass}" data-search="${item.toLowerCase()}">
+                        <div class="me-2 text-truncate" style="max-width: 70%;">
+                            <strong class="text-brand-blue" style="font-size: 0.85rem;">${titulo}</strong>
+                            ${explicacao}
+                        </div>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-warning py-0 px-2 fw-bold" style="font-size: 0.75rem;" onclick="prepararEdicao('${categoria}', ${index})" title="Editar Opção">✏️</button>
+                            <button class="btn btn-sm btn-danger py-0 px-2 fw-bold" style="font-size: 0.75rem;" onclick="removerItemPersonalizado('${categoria}', ${index})" title="Excluir Opção">x</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+
+            if (array.length > limit) {
+                if (!isExpanded) {
+                    html += `<button class="btn btn-sm btn-link text-decoration-none w-100 text-muted p-0 mt-1" onclick="toggleExpandir('${categoria}', true)">🔽 Ver mais (${array.length - limit})</button>`;
+                } else {
+                    html += `<button class="btn btn-sm btn-link text-decoration-none w-100 text-muted p-0 mt-2" onclick="toggleExpandir('${categoria}', false)">🔼 Ver menos</button>`;
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        // Função de Preparar Edição
+        function prepararEdicao(categoria, index) {
+            const item = configGlobal[categoria][index];
+            const partes = item.split(' — ');
+            
+            document.getElementById('novoTipo').value = categoria;
+            document.getElementById('novoTitulo').value = partes[0];
+            document.getElementById('novaExplicacao').value = partes[1] || '';
+            
+            edicaoAtual = { categoria, index };
+            
+            // Alterar o visual do formulário
+            document.getElementById('tituloFormOpcao').innerHTML = '✏️ Editar Opção Selecionada';
+            document.getElementById('tituloFormOpcao').classList.replace('text-success', 'text-warning');
+            const btnInserir = document.getElementById('btnInserirOpcao');
+            btnInserir.textContent = 'Atualizar';
+            btnInserir.classList.replace('btn-success', 'btn-warning');
+            
+            // Rolagem suave para os campos de inserção
+            document.getElementById('areaFormNovaOpcao').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function toggleExpandir(categoria, state) {
+            expandedCategories[categoria] = state;
+            atualizarDOMLista(categoria);
+        }
+
+        function filtrarListaDOM(input, itemClass) {
+            const termo = input.value.toLowerCase();
+            const items = document.querySelectorAll(`.${itemClass}`);
+            items.forEach(el => {
+                if (el.getAttribute('data-search').includes(termo)) {
+                    el.classList.remove('d-none'); el.classList.add('d-flex');
+                } else {
+                    el.classList.remove('d-flex'); el.classList.add('d-none');
+                }
+            });
+        }
+
+        function preencherSelectMisturado(id, array) {
+            const select = document.getElementById(id);
+            let optgroup = select.querySelector('optgroup.novas-opcoes');
+            
+            if(!optgroup) {
+                optgroup = document.createElement('optgroup');
+                optgroup.label = "Novas Opções (Banco de Dados)";
+                optgroup.className = "novas-opcoes text-success";
+                select.appendChild(optgroup);
+            }
+            optgroup.innerHTML = '';
+            array.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item; opt.textContent = item;
+                optgroup.appendChild(opt);
+            });
+        }
+
+        function adicionarNovoItem() {
+            const categoria = document.getElementById('novoTipo').value;
+            const titulo = document.getElementById('novoTitulo').value.trim();
+            const explicacao = document.getElementById('novaExplicacao').value.trim();
+            
+            if(!titulo) {
+                Swal.fire('Atenção', 'O Título é obrigatório.', 'warning');
+                return;
+            }
+
+            const itemFinal = explicacao ? `${titulo} — ${explicacao}` : titulo;
+            
+            if (edicaoAtual) {
+                // Se a categoria foi mudada durante a edição, remove da velha e adiciona na nova
+                if(edicaoAtual.categoria !== categoria) {
+                    configGlobal[edicaoAtual.categoria].splice(edicaoAtual.index, 1);
+                    configGlobal[categoria].push(itemFinal);
+                } else {
+                    // Sobrescreve na mesma posição para não bagunçar a lista
+                    configGlobal[categoria][edicaoAtual.index] = itemFinal;
+                }
+                
+                edicaoAtual = null; // Reseta a edição
+                
+                // Restaura o visual do botão
+                document.getElementById('tituloFormOpcao').innerHTML = '➕ Adicionar Nova Opção';
+                document.getElementById('tituloFormOpcao').classList.replace('text-warning', 'text-success');
+                const btnInserir = document.getElementById('btnInserirOpcao');
+                btnInserir.textContent = 'Inserir';
+                btnInserir.classList.replace('btn-warning', 'btn-success');
+                
+                salvarConfiguracoes(true, 'Opção Atualizada!');
+            } else {
+                // Novo item normal
+                configGlobal[categoria].push(itemFinal);
+                salvarConfiguracoes(true, 'Opção Adicionada!');
+            }
+            
+            document.getElementById('novoTitulo').value = '';
+            document.getElementById('novaExplicacao').value = '';
+        }
+
+        async function removerItemPersonalizado(categoria, index) {
+            const valor = configGlobal[categoria][index];
+            await fetch('/api/lixeira', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ categoria, valor })
+            });
+
+            configGlobal[categoria].splice(index, 1);
+            await salvarConfiguracoes(false);
+            Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Movido para Lixeira', showConfirmButton: false, timer: 2000 });
+        }
+
+        async function salvarConfiguracoes(mostrarAviso = false, mensagem = 'Opção Adicionada!') {
+            try {
+                await fetch('/api/configuracoes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(configGlobal)
+                });
+                await carregarConfiguracoes();
+                if(mostrarAviso) Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: mensagem, showConfirmButton: false, timer: 2000 });
+            } catch (err) {}
+        }
+
+        function abrirConfiguracoes() {
+            document.getElementById('painelCriacao').classList.add('d-none');
+            document.getElementById('painelLixeira').classList.add('d-none');
+            document.getElementById('resultadoContainer').classList.add('d-none');
+            document.getElementById('painelConfiguracoes').classList.remove('d-none');
+            if(window.innerWidth <= 768) toggleMenu();
+        }
+
+        async function abrirLixeira() {
+            document.getElementById('painelConfiguracoes').classList.add('d-none');
+            document.getElementById('painelLixeira').classList.remove('d-none');
+            await carregarLixeira();
+        }
+
+        async function carregarLixeira() {
+            const res = await fetch('/api/lixeira');
+            const itens = await res.json();
+            const container = document.getElementById('listaLixeira');
+            container.innerHTML = '';
+            
+            if(itens.length === 0) {
+                container.innerHTML = '<div class="p-4 text-center text-muted border rounded">A lixeira está vazia.</div>';
+                return;
+            }
+
+            itens.forEach(item => {
+                const diffTempos = new Date() - new Date(item.dataExclusao);
+                const diasPassados = Math.floor(diffTempos / (1000 * 60 * 60 * 24));
+                const diasRestantes = 10 - diasPassados;
+
+                container.innerHTML += `
+                    <div class="list-group-item d-flex justify-content-between align-items-center bg-white mb-2 border rounded p-3">
+                        <div>
+                            <span class="badge bg-secondary mb-1">${item.categoria.toUpperCase()}</span>
+                            <strong class="d-block text-dark">${item.valor.split(' — ')[0]}</strong>
+                            <small class="text-danger fw-bold">Expira em aprox. ${diasRestantes} dias</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-success fw-bold" onclick="restaurarItemLixeira('${item._id}')">♻️ Restaurar</button>
+                            <button class="btn btn-sm btn-danger fw-bold" onclick="excluirPermanente('${item._id}')">❌ Apagar</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function restaurarItemLixeira(id) {
+            await fetch(`/api/lixeira/restaurar/${id}`, { method: 'POST' });
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Restaurado!', showConfirmButton: false, timer: 1500 });
+            await carregarConfiguracoes(); 
+            await carregarLixeira();
+        }
+
+        async function excluirPermanente(id) {
+            await fetch(`/api/lixeira/${id}`, { method: 'DELETE' });
+            await carregarLixeira();
+        }
+
+        // ==========================================
+        // LÓGICA DO GERADOR DE ROTEIROS E HISTÓRICO
+        // ==========================================
         function gerarAleatorio() {
             const selects = ['narrador', 'formato', 'tema', 'gancho'];
             selects.forEach(id => {
                 const el = document.getElementById(id);
                 const options = Array.from(el.options).filter(o => !o.disabled && o.value !== "");
-                const randomOption = options[Math.floor(Math.random() * options.length)];
-                el.value = randomOption.value;
+                if (options.length > 0) el.value = options[Math.floor(Math.random() * options.length)].value;
             });
-            if (!document.getElementById('painelRevisao').classList.contains('d-none')) {
-                revisarPedido();
-            }
+            if (!document.getElementById('painelRevisao').classList.contains('d-none')) revisarPedido();
         }
 
         function revisarPedido() {
             const resumo = `
-                <div class="mb-2"><strong> Mercado:</strong> ${document.getElementById('mercado').value}</div>
-                <div class="mb-2"><strong> Narrador:</strong> ${document.getElementById('narrador').value}</div>
-                <div class="mb-2"><strong> Formato:</strong> ${document.getElementById('formato').value}</div>
-                <div class="mb-2"><strong> Tema:</strong> ${document.getElementById('tema').value}</div>
-                <div class="mb-2"><strong> Gancho:</strong> ${document.getElementById('gancho').value}</div>
+                <div class="mb-2"><strong>🌍 Mercado:</strong> ${document.getElementById('mercado').value}</div>
+                <div class="mb-2"><strong>👤 Narrador:</strong> ${document.getElementById('narrador').value}</div>
+                <div class="mb-2"><strong>🎬 Formato:</strong> ${document.getElementById('formato').value}</div>
+                <div class="mb-2"><strong>📌 Tema:</strong> ${document.getElementById('tema').value}</div>
+                <div class="mb-2"><strong>🪝 Gancho:</strong> ${document.getElementById('gancho').value}</div>
+                ${anexoData ? `<div class="mb-2 text-success"><strong>📎 Anexo Incluído:</strong> ${anexoData.nome}</div>` : ''}
             `;
             document.getElementById('resumoCombinacao').innerHTML = resumo;
             document.getElementById('painelCriacao').classList.add('d-none');
@@ -387,22 +707,18 @@
         }
 
         async function confirmarEnvio() {
-            const painelRevisao = document.getElementById('painelRevisao');
-            const loading = document.getElementById('loading');
-            const resContainer = document.getElementById('resultadoContainer');
-            const resDiv = document.getElementById('resultado');
-
             const dados = {
                 mercado: document.getElementById('mercado').value,
                 narrador: document.getElementById('narrador').value,
                 formato: document.getElementById('formato').value,
                 tema: document.getElementById('tema').value,
                 gancho: document.getElementById('gancho').value,
-                notas: document.getElementById('notas').value
+                notas: document.getElementById('notas').value,
+                anexo: anexoData 
             };
 
-            painelRevisao.classList.add('d-none');
-            loading.classList.remove('d-none');
+            document.getElementById('painelRevisao').classList.add('d-none');
+            document.getElementById('loading').classList.remove('d-none');
 
             try {
                 const response = await fetch('/api/gerar', {
@@ -412,58 +728,69 @@
                 });
                 const data = await response.json();
                 
-                resDiv.innerHTML = marked.parse(data.roteiro);
+                document.getElementById('resultado').innerHTML = marked.parse(data.roteiro);
+                document.getElementById('resultadoContainer').classList.remove('d-none');
                 
-                resContainer.classList.remove('d-none');
+                document.getElementById('filtroDataHistorico').value = '';
                 carregarHistorico();
-                
-                Swal.fire({
-                    title: 'Sucesso!',
-                    text: 'O roteiro foi gerado com a inteligência do Claude.',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-
             } catch (error) {
                 Swal.fire('Erro!', 'Falha ao comunicar com a API.', 'error');
                 novaSessao();
             } finally {
-                loading.classList.add('d-none');
+                document.getElementById('loading').classList.add('d-none');
             }
         }
 
         async function carregarHistorico() {
             try {
                 const response = await fetch('/api/historico');
-                const roteiros = await response.json();
-                const lista = document.getElementById('listaHistorico');
-                lista.innerHTML = '';
-                
-                roteiros.forEach(rot => {
-                    const div = document.createElement('div');
-                    div.className = 'historico-item';
-                    div.onclick = () => {
-                        exibirRoteiroSalvo(rot);
-                        if(window.innerWidth <= 768) toggleMenu();
-                    };
-                    const tituloCurto = rot.tema.split(' — ')[0];
-                    div.innerHTML = `
-                        <div class="historico-titulo fw-bold">${tituloCurto}</div>
-                        <div class="historico-data">${new Date(rot.dataCriacao).toLocaleString('pt-BR')} • ${rot.mercado}</div>
-                    `;
-                    lista.appendChild(div);
-                });
-
-                if (roteiros.length === 0) lista.innerHTML = '<div class="p-4 text-center text-muted small">Nenhum roteiro salvo.</div>';
+                todosRoteirosCache = await response.json();
+                renderizarHistorico(todosRoteirosCache);
             } catch(e) {}
+        }
+
+        function renderizarHistorico(roteirosBrutos) {
+            const dataFiltro = document.getElementById('filtroDataHistorico').value;
+            let roteirosFiltrados = roteirosBrutos;
+
+            if (dataFiltro) {
+                roteirosFiltrados = roteirosBrutos.filter(rot => {
+                    const dataRot = new Date(rot.dataCriacao);
+                    const dataRotString = new Date(dataRot.getTime() - (dataRot.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                    return dataRotString === dataFiltro;
+                });
+            }
+
+            const lista = document.getElementById('listaHistorico');
+            lista.innerHTML = '';
+
+            if (roteirosFiltrados.length === 0) {
+                lista.innerHTML = '<div class="p-4 text-center text-muted small">Nenhum roteiro encontrado.</div>';
+                return;
+            }
+
+            roteirosFiltrados.forEach(rot => {
+                const div = document.createElement('div');
+                div.className = 'historico-item';
+                div.onclick = () => {
+                    exibirRoteiroSalvo(rot);
+                    if(window.innerWidth <= 768) toggleMenu();
+                };
+                const tituloCurto = rot.tema.split(' — ')[0];
+                div.innerHTML = `
+                    <div class="historico-titulo fw-bold text-truncate">${tituloCurto}</div>
+                    <div class="historico-data">${new Date(rot.dataCriacao).toLocaleString('pt-BR')} • ${rot.mercado}</div>
+                `;
+                lista.appendChild(div);
+            });
         }
 
         function exibirRoteiroSalvo(rot) {
             document.getElementById('painelCriacao').classList.add('d-none');
             document.getElementById('painelRevisao').classList.add('d-none');
+            document.getElementById('painelConfiguracoes').classList.add('d-none');
+            document.getElementById('painelLixeira').classList.add('d-none');
             document.getElementById('resultadoContainer').classList.remove('d-none');
-            
             document.getElementById('resultado').innerHTML = marked.parse(rot.conteudo);
             document.getElementById('resultadoTitulo').innerText = "🕒 Roteiro Salvo";
         }
@@ -471,43 +798,31 @@
         function novaSessao() {
             document.getElementById('resultadoContainer').classList.add('d-none');
             document.getElementById('painelRevisao').classList.add('d-none');
+            document.getElementById('painelConfiguracoes').classList.add('d-none');
+            document.getElementById('painelLixeira').classList.add('d-none');
             document.getElementById('painelCriacao').classList.remove('d-none');
             document.getElementById('formRoteiro').reset();
-            
-            if(window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('active')) {
-                toggleMenu();
-            }
+            removerAnexo();
+            edicaoAtual = null; // Limpa edição
+            document.getElementById('resultadoTitulo').innerText = "✅ Briefing Finalizado";
+            if(window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('active')) toggleMenu();
         }
 
         function copiarTexto() {
-            const textoParaCopiar = document.getElementById('resultado').innerText;
-            navigator.clipboard.writeText(textoParaCopiar).then(() => {
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Copiado!',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+            navigator.clipboard.writeText(document.getElementById('resultado').innerText).then(() => {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Copiado!', showConfirmButton: false, timer: 1500 });
             });
         }
 
-        // FUNÇÃO DE PDF CORRIGIDA COM PAGE-BREAKS
         function exportarPDF() {
-            const elemento = document.getElementById('resultado');
-            
             const opt = {
-                margin:       [15, 15, 15, 15], // Margens maiores pra não cortar as bordas
-                filename:     'Roteiro_CocoAndLuna.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                // Esta é a regra de ouro que evita que linhas sejam cortadas no meio
-                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } 
+                margin: [15, 15, 15, 15], filename: 'Roteiro_CocoAndLuna.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } 
             };
-
-            html2pdf().set(opt).from(elemento).save();
+            html2pdf().set(opt).from(document.getElementById('resultado')).save();
         }
     </script>
 </body>
