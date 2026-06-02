@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gerador de Roteiros | Coco and Luna</title>
     
+    <!-- Ícone e Fontes -->
     <link rel="shortcut icon" href="./caneta-e-papel.png" type="image/x-icon" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet" />
     
+    <!-- CSS Externo -->
     <link rel="stylesheet" href="style.css" />
 
+    <!-- Bibliotecas JS Externas -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -67,15 +70,18 @@
             <button onclick="toggleLargura()" class="btn btn-sm btn-panel px-3 d-none d-md-block">
               ↔️ <span id="txtLargura">Expandir tela</span>
             </button>
-            <button onclick="toggleDarkModeGlobal()" class="btn btn-sm btn-panel px-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon-stars" viewBox="0 0 16 16">
-                <path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278M4.858 1.311A7.27 7.27 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.32 7.32 0 0 0 5.205-2.162q-.506.063-1.029.063c-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286" />
-                <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.73 1.73 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.73 1.73 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.73 1.73 0 0 0 1.097-1.097zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z" />
-              </svg>
+            <button onclick="toggleDarkModeGlobal()" class="btn btn-sm btn-panel px-3 d-flex align-items-center gap-2">
+              <span id="iconModo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon-stars" viewBox="0 0 16 16">
+                  <path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278M4.858 1.311A7.27 7.27 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.32 7.32 0 0 0 5.205-2.162q-.506.063-1.029.063c-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286" />
+                  <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.73 1.73 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.73 1.73 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.73 1.73 0 0 0 1.097-1.097zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z" />
+                </svg>
+              </span>
               <span id="txtModo">Modo Escuro</span>
             </button>
           </div>
 
+          <!-- PAINEL CRIAÇÃO -->
           <div class="card p-5 mb-4" id="painelCriacao">
             <div class="text-center mb-5">
               <h2 class="h3 fw-bold text-dark mb-2">Máquina de Roteiros</h2>
@@ -247,7 +253,7 @@
                       <option value="51. Você PODE ter um cachorro senior saudável e feliz sem gastar uma fortuna no veterinário.">51. Você PODE ter um cachorro senior saudável e feliz sem gastar uma fortuna no veterinário.</option>
                       <option value="52. Existe uma diferença enorme entre um tutor iniciante e alguém que realmente entende de animais.">52. Existe uma diferença enorme entre um tutor iniciante e alguém que realmente entende de animais.</option>
                       <option value="53. 5 coisas que os tutores de cachorro mais dedicados estão fazendo diferente em 2025.">53. 5 coisas que os tutores de cachorro mais dedicados estão fazendo diferente em 2025.</option>
-                      <option value="54. Essas são as 3 coisas que todo tutor responsável de gato deveria saber antes do gato completar 5 anos.">54. Essas são as 3 coisas que todo tutor responsável de gato deveria saber antes do gato completar 5 anos.</option>
+                      <option value="54. Estas são as 3 coisas que todo tutor responsável de gato deveria saber antes do gato completar 5 anos.">Estas são as 3 coisas que todo tutor responsável de gato deveria saber antes do gato completar 5 anos.</option>
                       <option value="55. Coisas que a gente não permite na rotina dos pets daqui - principalmente por conta do que sabe.">55. Coisas que a gente não permite na rotina dos pets daqui - mainly por conta do que sabe.</option>
                       <option value="56. Coisas que a gente não compactua trabalhando com saúde animal há anos.">56. Coisas que a gente não compactua trabalhando com saúde animal há anos.</option>
                     </optgroup>
@@ -259,7 +265,7 @@
                     <optgroup label="Urgência & Tempo">
                       <option value="60. Se o seu cachorro tem 7 anos ou mais, essas são as 5 coisas que você precisa começar a fazer agora.">60. Se o seu cachorro tem 7 anos ou mais, essas são as 5 coisas que você precisa começar a fazer agora.</option>
                       <option value="61. Ração seca ou ração úmida? Qual é melhor pra saúde dos rins do seu gato?">61. Ração seca ou ração úmida? Qual é melhor pra saúde dos rins do seu gato?</option>
-                      <option value="62. Se o seu cachorro coça muito tem 3 coisas que você precisa verificar com urgência.">62. Se o seu cachorro coça muito tem 3 coisas que você precisa verificar com urgência.</option>
+                      <option value="62. Se o seu cachorro coça muito tem 3 coisas que você precisa verificar com urgência.">62. Se o seu cachorro coça muito tem 3 কয়sas que você precisa verificar com urgência.</option>
                       <option value="63. Trocas inúteis que tutores de pet fazem o tempo todo e que não mudam nada na prática.">63. Trocas inúteis que tutores de pet fazem o tempo todo e que não mudam nada na prática.</option>
                       <option value="64. Acabou de adotar um cachorro? Não pule essas 3 coisas na primeira semana.">64. Acabou de adotar um cachorro? Não pule essas 3 coisas na primeira semana. </option>
                     </optgroup>
@@ -274,29 +280,23 @@
                     </button>
                   </div>
                   <textarea id="notas" class="form-control" rows="3" placeholder="Insira direcionamentos extras ou contexto para o Claude..."></textarea>
-
                   <input type="file" id="anexoInput" class="d-none" multiple />
                   <div id="anexoPreview" class="mt-3 d-flex flex-column gap-2"></div>
                 </div>
 
                 <div class="col-12 d-flex mobile-stack gap-3 mt-4">
-                  <button type="button" onclick="gerarAleatorio()" class="btn btn-random w-25 fw-bold text-nowrap">
-                    Aleatório
-                  </button>
-                  <button type="submit" class="btn btn-primary flex-grow-1 fw-bold fs-6">
-                    Gerar Roteiro
-                  </button>
+                  <button type="button" onclick="gerarAleatorio()" class="btn btn-random w-25 fw-bold text-nowrap">Aleatório</button>
+                  <button type="submit" class="btn btn-primary flex-grow-1 fw-bold fs-6">Gerar Roteiro</button>
                 </div>
 
                 <div class="col-12 text-center mt-3">
-                  <small class="api-info text-muted">
-                    Conectado à API Stateless da Anthropic (Claude Opus). O modelo não retém memória para garantir criatividade bruta em cada nova geração.
-                  </small>
+                  <small class="api-info text-muted">Conectado à API Stateless da Anthropic (Claude Opus). O modelo não retém memória para garantir criatividade bruta em cada nova geração.</small>
                 </div>
               </div>
             </form>
           </div>
 
+          <!-- PAINEL REVISÃO -->
           <div id="painelRevisao" class="card p-5 d-none text-center">
             <h4 class="fw-bold mb-4 text-dark">Confirmar Estratégia de Conteúdo</h4>
             <div class="text-start bg-light p-4 rounded mb-5 border" id="resumoCombinacao" style="font-size: 0.95rem; line-height: 1.6"></div>
@@ -307,6 +307,7 @@
             </div>
           </div>
 
+          <!-- PAINEL CONFIGURAÇÕES -->
           <div id="painelConfiguracoes" class="card p-5 d-none">
             <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
               <h4 class="m-0 text-dark fw-bold">Gerenciar Variáveis da IA</h4>
@@ -344,48 +345,33 @@
             </div>
 
             <h6 class="fw-bold mb-4 text-dark border-bottom pb-2">Banco de Dados Ativo</h6>
-
             <div class="row g-4">
-              <div class="col-12">
-                <label class="form-label text-muted m-0">Temas Adicionais</label>
-                <div id="listaTemas"></div>
-              </div>
-              <div class="col-12">
-                <label class="form-label text-muted m-0">Ganchos Adicionais</label>
-                <div id="listaGanchos"></div>
-              </div>
-              <div class="col-lg-4 col-md-6">
-                <label class="form-label text-muted m-0">Mercados</label>
-                <div id="listaMercados"></div>
-              </div>
-              <div class="col-lg-4 col-md-6">
-                <label class="form-label text-muted m-0">Narradores</label>
-                <div id="listaNarradores"></div>
-              </div>
-              <div class="col-lg-4 col-md-12">
-                <label class="form-label text-muted m-0">Formatos</label>
-                <div id="listaFormatos"></div>
-              </div>
+              <div class="col-12"><label class="form-label text-muted m-0">Temas Adicionais</label><div id="listaTemas"></div></div>
+              <div class="col-12"><label class="form-label text-muted m-0">Ganchos Adicionais</label><div id="listaGanchos"></div></div>
+              <div class="col-lg-4 col-md-6"><label class="form-label text-muted m-0">Mercados</label><div id="listaMercados"></div></div>
+              <div class="col-lg-4 col-md-6"><label class="form-label text-muted m-0">Narradores</label><div id="listaNarradores"></div></div>
+              <div class="col-lg-4 col-md-12"><label class="form-label text-muted m-0">Formatos</label><div id="listaFormatos"></div></div>
             </div>
           </div>
 
+          <!-- PAINEL LIXEIRA -->
           <div id="painelLixeira" class="card p-5 d-none">
             <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
               <h4 class="m-0 text-danger fw-bold">Lixeira do Sistema</h4>
               <button onclick="abrirConfiguracoes()" class="btn btn-light border text-dark fw-bold px-4 bg-transparent">Voltar</button>
             </div>
-            <p class="text-muted mb-4">
-              Itens excluídos permanecem aqui por 10 dias antes da limpeza automática do servidor.
-            </p>
+            <p class="text-muted mb-4">Itens excluídos permanecem aqui por 10 dias antes da limpeza automática do servidor.</p>
             <div id="listaLixeira" class="list-group"></div>
           </div>
 
+          <!-- LOADING -->
           <div id="loading" class="text-center d-none my-5 py-5">
             <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem"></div>
             <h5 class="fw-bold text-dark">Processando Estratégia...</h5>
             <p class="text-muted small">O Claude está a cruzar as informações com o manual da marca.</p>
           </div>
 
+          <!-- PAINEL RESULTADO IA -->
           <div id="resultadoContainer" class="card p-4 p-md-5 d-none shadow-sm mb-4">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 border-bottom pb-3 gap-3">
               <h4 class="m-0 text-primary fw-bold" id="resultadoTitulo">Briefing Finalizado</h4>
@@ -400,10 +386,11 @@
             </div>
           </div>
 
+          <!-- PAINEL ESTRUTURADOR TÉCNICO -->
           <div id="painelEstruturador" class="card p-5 d-none mb-4 shadow-sm">
-            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 flex-wrap gap-2">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 flex-wrap gap-2 border-bottom">
               <div>
-                <h4 class="m-0 text-dark fw-bold">Roteiro de Vídeo</h4>
+                <h4 class="m-0 text-dark fw-bold">Criador de roteiro</h4>
                 <p class="text-muted small m-0">Briefing completo para edição de conteúdo — preencha todos os campos antes de exportar.</p>
               </div>
               <button onclick="exportarPDFEstruturado()" class="btn btn-primary d-flex align-items-center gap-2">
@@ -412,17 +399,11 @@
             </div>
 
             <div class="row g-4 mb-5">
-              <div class="col-12">
-                <h5 class="text-primary fw-bold mb-0 small tracking-wider pb-2 border-bottom">1. INFORMAÇÕES DO PROJETO</h5>
-              </div>
-
-              <div class="col-md-8">
-                <label class="form-label">Tema do Vídeo</label>
-                <input type="text" id="est_tema" class="form-control" placeholder="Ex: Ração Seca vs Intestino Sênior" />
-              </div>
+              <div class="col-12"><h5 class="text-primary fw-bold mb-0 small tracking-wider pb-2 border-bottom">1. INFORMAÇÕES DO PROJETO</h5></div>
+              <div class="col-md-8"><label class="form-label">Tema do Vídeo</label><input type="text" id="est_tema" class="form-control" placeholder="Ex: Ração Seca vs Intestino Sênior" /></div>
               <div class="col-md-4">
                 <label class="form-label">Objetivo do Vídeo</label>
-                <select id="est_objetivo" class="form-select">
+                <select id="est_objetivo" class="form-select" onchange="verificarObjetivoOutro(this.value)">
                   <option value="">Selecione o objetivo</option>
                   <option value="humor">Humor</option>
                   <option value="institucional">Sério/Institucional</option>
@@ -430,67 +411,38 @@
                   <option value="lifestyle">Lifestyle</option>
                   <option value="vlog">Vlog/Bastidores</option>
                   <option value="storytelling">Storytelling</option>
+                  <option value="outros">Outros</option>
                 </select>
+                <div id="est_objetivo_outro_container" class="mt-2 d-none">
+                  <input type="text" id="est_objetivo_outro" class="form-control" placeholder="Especifique o objetivo..." />
+                </div>
               </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Estilo</label>
-                <input type="text" id="est_estilo" class="form-control" placeholder="Ex: Clean, Dinâmico" />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Formato</label>
-                <input type="text" id="est_formato" class="form-control" placeholder="Ex: 9:16 (Reels)" />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Veiculação</label>
-                <input type="text" id="est_veiculacao" class="form-control" placeholder="Ex: Instagram / TikTok" />
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Narrador</label>
-                <input type="text" id="est_narrador" class="form-control" placeholder="Ex: Veterinária" />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Tempo Estimado</label>
-                <input type="text" id="est_tempo" class="form-control" placeholder="Ex: 60s" />
-              </div>
+              <div class="col-md-4"><label class="form-label">Estilo</label><input type="text" id="est_estilo" class="form-control" placeholder="Ex: Clean, Dinâmico" /></div>
+              <div class="col-md-4"><label class="form-label">Formato</label><input type="text" id="est_formato" class="form-control" placeholder="Ex: 9:16 (Reels)" /></div>
+              <div class="col-md-4"><label class="form-label">Veiculação</label><input type="text" id="est_veiculacao" class="form-control" placeholder="Ex: Instagram / TikTok" /></div>
+              <div class="col-md-4"><label class="form-label">Narrador</label><input type="text" id="est_narrador" class="form-control" placeholder="Ex: Veterinária" /></div>
+              <div class="col-md-4"><label class="form-label">Tempo Estimado</label><input type="text" id="est_tempo" class="form-control" placeholder="Ex: 60s" /></div>
               <div class="col-md-4">
                 <label class="form-label">Prazo de Entrega</label>
                 <input type="date" id="est_prazo" class="form-control" onchange="calcularBadgePrazo()" />
                 <div id="est_badge_prazo" class="mt-2"></div>
               </div>
-
               <div class="col-12">
                 <label class="form-label d-block mb-2">Países de Veiculação</label>
                 <div class="p-3 border rounded bg-light d-flex gap-4">
-                  <div class="form-check">
-                    <input type="checkbox" id="est_br" class="form-check-input border-secondary" />
-                    <label class="form-check-label fw-bold text-dark">Brasil</label>
-                  </div>
-                  <div class="form-check">
-                    <input type="checkbox" id="est_eua" class="form-check-input border-secondary" />
-                    <label class="form-check-label fw-bold text-dark">EUA</label>
-                  </div>
+                  <div class="form-check"><input type="checkbox" id="est_br" class="form-check-input border-secondary" /><label class="form-check-label fw-bold text-dark">Brasil</label></div>
+                  <div class="form-check"><input type="checkbox" id="est_eua" class="form-check-input border-secondary" /><label class="form-check-label fw-bold text-dark">EUA</label></div>
                 </div>
               </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Referência 1</label>
-                <input type="text" id="est_ref1" class="form-control" placeholder="Link ou observação..." />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Referência 2</label>
-                <input type="text" id="est_ref2" class="form-control" placeholder="Link ou observação..." />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Referência 3</label>
-                <input type="text" id="est_ref3" class="form-control" placeholder="Link ou observação..." />
-              </div>
+              
+              <div class="col-md-4"><label class="form-label">Referência 1</label><input type="text" id="est_ref1" class="form-control" placeholder="Link ou observação..." /></div>
+              <div class="col-md-4"><label class="form-label">Referência 2</label><input type="text" id="est_ref2" class="form-control" placeholder="Link ou observação..." /></div>
+              <div class="col-md-4"><label class="form-label">Referência 3</label><input type="text" id="est_ref3" class="form-control" placeholder="Link ou observação..." /></div>
             </div>
 
             <div class="mb-5 border-bottom pb-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="text-primary fw-bold m-0 small tracking-wider">2. DIVISÃO DE CENAS TÉCNICAS</h5>
+                <h5 class="text-primary fw-bold m-0 small tracking-wider">2. DIVISÃO DE CENAS</h5>
                 <div class="btn-group btn-group-sm">
                   <button type="button" onclick="adicionarCenaPainel()" class="btn btn-outline-primary border py-1">+ Adicionar Cena</button>
                   <button type="button" onclick="removerUltimaCenaPainel()" class="btn btn-outline-danger border py-1">- Remover Última</button>
@@ -505,21 +457,20 @@
             </div>
 
             <div class="row g-4">
-              <div class="col-12">
-                <h5 class="text-primary fw-bold mb-0 small tracking-wider pb-2 border-bottom">3. CAPA / THUMBNAIL E METRICS</h5>
-              </div>
-              <div class="col-md-8">
-                <label class="form-label">Texto de Apoio da Thumbnail (Gatilho da Capa)</label>
-                <input type="text" id="est_thumb_text" class="form-control" placeholder="Ex: O segredo oculto da ração..." />
-              </div>
+              <div class="col-12"><h5 class="text-primary fw-bold mb-0 small tracking-wider pb-2 border-bottom">3. THUMBNAIL DO VÍDEO</h5></div>
+              <div class="col-md-8"><label class="form-label">Texto da Thumbnail</label><input type="text" id="est_thumb_text" class="form-control" placeholder="Ex: O segredo oculto da ração..." /></div>
               <div class="col-md-4">
-                <label class="form-label">Direcionamento Visual da Capa</label>
-                <select id="est_thumb_type" class="form-select">
+                <label class="form-label">Orientação / Tipo</label>
+                <select id="est_thumb_type" class="form-select" onchange="verificarThumbOutro(this.value)">
                   <option value="">Selecione o tipo visual</option>
                   <option value="imagem">🖼️ Imagem Real</option>
                   <option value="cartoon">🎨 Elementos/Cartoon</option>
                   <option value="frase">💬 Minimalista (Somente Frase)</option>
+                  <option value="outros">Outros</option>
                 </select>
+                <div id="est_thumb_outro_container" class="mt-2 d-none">
+                  <input type="text" id="est_thumb_outro" class="form-control" placeholder="Especifique o direcionamento..." />
+                </div>
               </div>
             </div>
           </div>
@@ -527,6 +478,7 @@
       </div>
     </div>
 
+    <!-- O SEU NOVO ARQUIVO DE SCRIPTS -->
     <script src="app.js"></script>
   </body>
 </html>
