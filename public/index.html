@@ -4,480 +4,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gerador de Roteiros | Coco and Luna</title>
+    
     <link rel="shortcut icon" href="./caneta-e-papel.png" type="image/x-icon" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet" />
+    
+    <link rel="stylesheet" href="style.css" />
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <style>
-      :root {
-        --brand-blue: #2b5fed;
-        --brand-blue-hover: #1e45b3;
-        --brand-red: #ff3153;
-        --brand-red-hover: #e02947;
-        --bg-main: #ebf3fe;
-        --sidebar-bg: #ffffff;
-        --sidebar-hover: #f8fafc;
-        --text-dark: #1e293b;
-        --card-bg: #ffffff;
-        --input-bg: #f8fafc;
-        --border-color: #e2e8f0;
-        --radius-card: 24px;
-        --radius-btn: 14px;
-        --radius-input: 12px;
-      }
-
-      /* Modo Escuro - Correções Definitivas */
-      body.dark-mode {
-        --bg-main: #0f172a;
-        --sidebar-bg: #1e293b;
-        --sidebar-hover: #334155;
-        --text-dark: #f1f5f9;
-        --card-bg: #1e293b;
-        --input-bg: #0f172a;
-        --border-color: #334155;
-      }
-
-      body.dark-mode .bg-light,
-      body.dark-mode .bg-white {
-        background-color: var(--input-bg) !important;
-      }
-      body.dark-mode .text-dark {
-        color: var(--text-dark) !important;
-      }
-      body.dark-mode .text-muted {
-        color: #94a3b8 !important;
-      }
-
-      body {
-        font-family: "Lato", sans-serif;
-        background-color: var(--bg-main);
-        color: var(--text-dark);
-        height: 100vh;
-        overflow: hidden;
-        transition:
-          background-color 0.3s,
-          color 0.3s;
-      }
-      .app-container {
-        display: flex;
-        height: 100vh;
-        flex-direction: row;
-      }
-
-      .sidebar {
-        position: relative;
-        width: 340px;
-        min-width: 80px;
-        max-width: 600px;
-        background-color: var(--sidebar-bg);
-        color: var(--text-dark);
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-        overflow-x: hidden;
-        z-index: 100;
-        box-shadow: 4px 0 24px rgba(43, 95, 237, 0.04);
-        transition:
-          width 0.3s ease,
-          background-color 0.3s;
-        border-right: none;
-      }
-      .sidebar.collapsed {
-        width: 80px !important;
-      }
-      .sidebar-resizer {
-        width: 6px;
-        cursor: col-resize;
-        position: absolute;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        z-index: 105;
-        background: transparent;
-        transition: 0.2s;
-      }
-      .sidebar-resizer:hover,
-      .sidebar-resizer.active {
-        background: rgba(43, 95, 237, 0.2);
-      }
-
-      .sidebar-header {
-        padding: 30px 20px 20px;
-        position: sticky;
-        top: 0;
-        background: var(--sidebar-bg);
-        z-index: 11;
-        transition: background-color 0.3s;
-      }
-      .hide-on-collapse {
-        transition: opacity 0.2s;
-      }
-      .sidebar.collapsed .hide-on-collapse {
-        display: none !important;
-      }
-      .sidebar.collapsed .px-4 {
-        padding-left: 10px !important;
-        padding-right: 10px !important;
-      }
-      .sidebar.collapsed .btn {
-        padding: 10px 0;
-      }
-      .sidebar.collapsed .btn span {
-        display: none;
-      }
-
-      .historico-item {
-        padding: 16px 20px;
-        border-bottom: 1px solid var(--border-color);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border-radius: 12px;
-        margin: 4px 12px;
-        background-color: var(--card-bg);
-      }
-      .sidebar.collapsed .historico-item {
-        padding: 10px;
-        text-align: center;
-      }
-      .sidebar.collapsed .historico-item .historico-titulo,
-      .sidebar.collapsed .historico-item .historico-data {
-        display: none;
-      }
-      .historico-item:hover {
-        background-color: var(--sidebar-hover);
-        transform: translateX(4px);
-      }
-      .historico-titulo {
-        font-size: 0.95rem;
-        font-weight: 700;
-        line-height: 1.3;
-        color: var(--brand-blue);
-      }
-      .historico-data {
-        font-size: 0.8rem;
-        margin-top: 6px;
-        font-weight: 400;
-      }
-
-      .main-content {
-        flex-grow: 1;
-        padding: 40px;
-        overflow-y: auto;
-        position: relative;
-      }
-
-      /* Sistema de Ajuste Dinâmico de Largura */
-      .max-w-custom {
-        max-width: 950px;
-        margin: 0 auto;
-        transition: max-width 0.3s ease;
-      }
-      .max-w-custom.expanded {
-        max-width: 1400px;
-      }
-
-      .card {
-        border: none;
-        border-radius: var(--radius-card);
-        box-shadow: 0 12px 40px rgba(43, 95, 237, 0.06);
-        background-color: var(--card-bg);
-        transition: background-color 0.3s;
-      }
-      .form-label {
-        font-weight: 700;
-        color: var(--text-dark);
-        font-size: 0.85rem;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        opacity: 0.8;
-      }
-      .form-control,
-      .form-select {
-        border-radius: var(--radius-input);
-        border: 1px solid var(--border-color);
-        padding: 12px 16px;
-        background-color: var(--input-bg);
-        font-size: 0.95rem;
-        color: var(--text-dark);
-        transition: all 0.2s;
-        box-shadow: none !important;
-      }
-      .form-control:focus,
-      .form-select:focus {
-        border-color: var(--brand-blue);
-        background-color: var(--card-bg);
-        box-shadow: 0 0 0 4px rgba(43, 95, 237, 0.1) !important;
-        color: var(--text-dark);
-      }
-
-      /* Botões customizados limpos */
-      .btn {
-        border-radius: var(--radius-btn);
-        font-weight: 700;
-        font-size: 0.95rem;
-        transition: all 0.2s ease;
-        letter-spacing: 0.3px;
-        padding: 12px 20px;
-      }
-
-      .btn-panel {
-        background-color: var(--card-bg);
-        color: var(--text-dark);
-        border: 1px solid var(--border-color);
-      }
-      .btn-panel:hover {
-        background-color: var(--sidebar-hover);
-        color: var(--brand-blue);
-        border-color: var(--brand-blue);
-      }
-
-      .btn-primary {
-        background-color: var(--brand-blue);
-        border: none;
-        color: white;
-        box-shadow: 0 4px 12px rgba(43, 95, 237, 0.2);
-      }
-      .btn-primary:hover {
-        background-color: var(--brand-blue-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(43, 95, 237, 0.3);
-        color: white;
-      }
-
-      .btn-danger {
-        background-color: var(--brand-red);
-        border: none;
-        color: white;
-        box-shadow: 0 4px 12px rgba(255, 49, 83, 0.2);
-      }
-      .btn-danger:hover {
-        background-color: var(--brand-red-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(255, 49, 83, 0.3);
-        color: white;
-      }
-
-      .btn-outline-primary {
-        color: var(--brand-blue);
-        border: 1px solid var(--brand-blue);
-        background: transparent;
-      }
-      .btn-outline-primary:hover {
-        background-color: var(--brand-blue);
-        color: white;
-      }
-
-      .btn-outline-danger {
-        color: var(--brand-red);
-        border: 1px solid var(--brand-red);
-        background: transparent;
-      }
-      .btn-outline-danger:hover {
-        background-color: var(--brand-red);
-        color: white;
-      }
-
-      optgroup {
-        font-weight: 900;
-        color: var(--brand-blue);
-      }
-      .api-info {
-        font-size: 0.85rem;
-        line-height: 1.5;
-        display: block;
-        margin-top: 16px;
-        font-weight: 400;
-      }
-
-      .markdown-body {
-        font-size: 1rem;
-        line-height: 1.7;
-        color: var(--text-dark);
-      }
-      .markdown-body table {
-        width: 100%;
-        margin-bottom: 1.5rem;
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-      }
-      .markdown-body th,
-      .markdown-body td {
-        padding: 12px 16px;
-        vertical-align: top;
-        border-bottom: 1px solid var(--border-color);
-        border-right: 1px solid var(--border-color);
-      }
-      .markdown-body th:last-child,
-      .markdown-body td:last-child {
-        border-right: none;
-      }
-      .markdown-body tr:last-child td {
-        border-bottom: none;
-      }
-      .markdown-body thead th {
-        background-color: var(--input-bg);
-        color: var(--brand-blue);
-        font-weight: 900;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        letter-spacing: 0.5px;
-      }
-
-      .sc-box {
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-input);
-        padding: 20px;
-        margin-bottom: 16px;
-        background-color: var(--card-bg);
-        position: relative;
-      }
-      .sc-number {
-        width: 36px;
-        height: 36px;
-        background-color: var(--input-bg);
-        color: var(--brand-blue);
-        border-radius: 8px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 900;
-        margin-right: 10px;
-      }
-
-      .mobile-header {
-        display: none;
-        background-color: var(--card-bg);
-        color: var(--text-dark);
-        padding: 16px 24px;
-        align-items: center;
-        justify-content: space-between;
-        z-index: 101;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        border-bottom: 1px solid var(--border-color);
-      }
-      .overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(15, 23, 42, 0.4);
-        backdrop-filter: blur(4px);
-        z-index: 50;
-        transition: 0.3s;
-      }
-
-      @media (max-width: 768px) {
-        body {
-          overflow: auto;
-        }
-        .app-container {
-          flex-direction: column;
-          height: auto;
-          min-height: 100vh;
-        }
-        .mobile-header {
-          display: flex;
-          position: sticky;
-          top: 0;
-        }
-        .sidebar {
-          position: fixed;
-          left: -340px;
-          top: 0;
-          bottom: 0;
-          height: 100%;
-          box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
-          width: 280px !important;
-        }
-        .sidebar-resizer {
-          display: none;
-        }
-        .sidebar.active {
-          left: 0;
-        }
-        .overlay.active {
-          display: block;
-        }
-        .main-content {
-          padding: 20px 15px;
-        }
-        .card {
-          padding: 30px 20px !important;
-        }
-        .mobile-stack {
-          flex-direction: column !important;
-          width: 100%;
-          gap: 12px;
-        }
-        .mobile-stack button {
-          width: 100% !important;
-          margin: 0;
-        }
-      }
-    </style>
   </head>
   <body>
     <div class="app-container">
       <div class="mobile-header">
-        <img
-          src="coco-and-luna-logo.png"
-          alt="Coco and Luna"
-          id="logoMobile"
-          style="max-height: 28px; object-fit: contain"
-        />
-        <button
-          class="btn btn-sm btn-panel fw-bold"
-          onclick="toggleMenuMobile()"
-        >
-          Menu
-        </button>
+        <img src="coco-and-luna-logo.png" alt="Coco and Luna" id="logoMobile" style="max-height: 28px; object-fit: contain" />
+        <button class="btn btn-sm btn-panel fw-bold" onclick="toggleMenuMobile()">Menu</button>
       </div>
       <div class="overlay" id="overlay" onclick="toggleMenuMobile()"></div>
 
       <div class="sidebar" id="sidebar">
         <div class="sidebar-resizer" id="sidebarResizer"></div>
 
-        <div
-          class="sidebar-header d-flex justify-content-between align-items-center"
-        >
-          <img
-            src="coco-and-luna-logo.png"
-            id="logoSidebar"
-            alt="Coco and Luna"
-            class="hide-on-collapse"
-            style="max-height: 36px; object-fit: contain"
-          />
-          <button
-            class="btn btn-sm btn-panel p-2"
-            onclick="toggleSidebarCollapse()"
-            title="Recolher Menu"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
+        <div class="sidebar-header d-flex justify-content-between align-items-center">
+          <img src="coco-and-luna-logo.png" id="logoSidebar" alt="Coco and Luna" class="hide-on-collapse" style="max-height: 36px; object-fit: contain" />
+          <button class="btn btn-sm btn-panel p-2" onclick="toggleSidebarCollapse()" title="Recolher Menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -485,52 +38,25 @@
           </button>
         </div>
 
-        <div
-          class="px-4 pb-4 border-bottom"
-          style="border-color: var(--border-color) !important"
-        >
-          <button
-            onclick="novaSessao()"
-            class="btn btn-primary w-100 mb-2"
-            title="Novo Roteiro"
-          >
+        <div class="px-4 pb-4 border-bottom" style="border-color: var(--border-color) !important">
+          <button onclick="novaSessao()" class="btn btn-primary w-100 mb-2" title="Novo Roteiro">
              <span class="hide-on-collapse ms-1">Novo Roteiro</span>
           </button>
-          <button
-            onclick="abrirEstruturadorCompleto()"
-            class="btn btn-panel w-100 mb-3"
-            title="Estruturador de Roteiro"
-          >
+          <button onclick="abrirEstruturadorCompleto()" class="btn btn-panel w-100 mb-3" title="Estruturador de Roteiro">
              <span class="hide-on-collapse ms-1">Criador de roteiro</span>
           </button>
-          <button
-            onclick="abrirConfiguracoes()"
-            class="btn btn-panel w-100 mb-4"
-            title="Configurações"
-          >
+          <button onclick="abrirConfiguracoes()" class="btn btn-panel w-100 mb-4" title="Configurações">
              <span class="hide-on-collapse ms-1">Configurações</span>
           </button>
 
           <div class="form-group hide-on-collapse">
-            <label class="form-label text-muted small mb-2"
-              >Filtrar por data</label
-            >
-            <input
-              type="date"
-              id="filtroDataHistorico"
-              class="form-control"
-              onchange="carregarHistorico()"
-            />
+            <label class="form-label text-muted small mb-2">Filtrar por data</label>
+            <input type="date" id="filtroDataHistorico" class="form-control" onchange="carregarHistorico()" />
           </div>
         </div>
 
         <div class="px-3 pt-4 pb-2 hide-on-collapse">
-          <h6
-            class="text-uppercase fw-bold text-muted small ms-2"
-            style="letter-spacing: 0.5px"
-          >
-            Histórico Recente
-          </h6>
+          <h6 class="text-uppercase fw-bold text-muted small ms-2" style="letter-spacing: 0.5px">Histórico Recente</h6>
         </div>
         <div id="listaHistorico" class="flex-grow-1 pb-4"></div>
       </div>
@@ -538,30 +64,13 @@
       <div class="main-content">
         <div class="container-fluid max-w-custom" id="mainContainer">
           <div class="d-flex justify-content-end mb-4 gap-2">
-            <button
-              onclick="toggleLargura()"
-              class="btn btn-sm btn-panel px-3 d-none d-md-block"
-            >
+            <button onclick="toggleLargura()" class="btn btn-sm btn-panel px-3 d-none d-md-block">
               ↔️ <span id="txtLargura">Expandir tela</span>
             </button>
-            <button
-              onclick="toggleDarkModeGlobal()"
-              class="btn btn-sm btn-panel px-3"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                class="bi bi-moon-stars"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278M4.858 1.311A7.27 7.27 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.32 7.32 0 0 0 5.205-2.162q-.506.063-1.029.063c-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286"
-                />
-                <path
-                  d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.73 1.73 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.73 1.73 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.73 1.73 0 0 0 1.097-1.097zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"
-                />
+            <button onclick="toggleDarkModeGlobal()" class="btn btn-sm btn-panel px-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon-stars" viewBox="0 0 16 16">
+                <path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278M4.858 1.311A7.27 7.27 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.32 7.32 0 0 0 5.205-2.162q-.506.063-1.029.063c-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286" />
+                <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.73 1.73 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.73 1.73 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.73 1.73 0 0 0 1.097-1.097zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z" />
               </svg>
               <span id="txtModo">Modo Escuro</span>
             </button>
@@ -570,18 +79,10 @@
           <div class="card p-5 mb-4" id="painelCriacao">
             <div class="text-center mb-5">
               <h2 class="h3 fw-bold text-dark mb-2">Máquina de Roteiros</h2>
-              <p class="text-muted">
-                Combine os elementos estratégicos para gerar o briefing.
-              </p>
+              <p class="text-muted">Combine os elementos estratégicos para gerar o briefing.</p>
             </div>
 
-            <form
-              id="formRoteiro"
-              onsubmit="
-                event.preventDefault();
-                revisarPedido();
-              "
-            >
+            <form id="formRoteiro" onsubmit="event.preventDefault(); revisarPedido();">
               <div class="row g-4">
                 <div class="col-md-4">
                   <label class="form-label">Mercado</label>
@@ -593,18 +94,10 @@
                 <div class="col-md-4">
                   <label class="form-label">Narrador</label>
                   <select id="narrador" class="form-select">
-                    <option value="Veterinária da marca">
-                      Veterinária da marca
-                    </option>
-                    <option value="Colaborador(a) da empresa">
-                      Colaborador(a) da empresa
-                    </option>
-                    <option value="Pet do colaborador">
-                      Pet do colaborador
-                    </option>
-                    <option value="UGC parceiro (tutor externo)">
-                      UGC parceiro (tutor externo)
-                    </option>
+                    <option value="Veterinária da marca">Veterinária da marca</option>
+                    <option value="Colaborador(a) da empresa">Colaborador(a) da empresa</option>
+                    <option value="Pet do colaborador">Pet do colaborador</option>
+                    <option value="UGC parceiro (tutor externo)">UGC parceiro (tutor externo)</option>
                   </select>
                 </div>
                 <div class="col-md-4">
@@ -614,13 +107,9 @@
                     <option value="Palestrinha">Palestrinha</option>
                     <option value="Narrado">Narrado</option>
                     <option value="Cine">Cine</option>
-                    <option value="Storytelling visual">
-                      Storytelling visual
-                    </option>
+                    <option value="Storytelling visual">Storytelling visual</option>
                     <option value="Tela verde">Tela verde</option>
-                    <option value="Conflito situacional">
-                      Conflito situacional
-                    </option>
+                    <option value="Conflito situacional">Conflito situacional</option>
                     <option value="Diálogo: Conflito">Diálogo: Conflito</option>
                   </select>
                 </div>
@@ -628,223 +117,60 @@
                 <div class="col-12">
                   <label class="form-label">Tema Principal</label>
                   <select id="tema" class="form-select" required>
-                    <option value="" disabled selected>
-                      Selecione um tema mapeado...
-                    </option>
+                    <option value="" disabled selected>Selecione um tema mapeado...</option>
                     <optgroup label="Humor / Identificação">
-                      <option
-                        value="1. Casa em Caos (Gases do Pet) — Saúde digestiva, microbiota, Digestive Health"
-                      >
-                        1. Casa em Caos (Gases do Pet) — Saúde digestiva,
-                        microbiota, Digestive Health
-                      </option>
-                      <option
-                        value="2. Drama Felino (Gato Gritando) — Comportamento e imunidade felina"
-                      >
-                        2. Drama Felino (Gato Gritando) — Comportamento e
-                        imunidade felina
-                      </option>
-                      <option
-                        value="3. Confissões do Pet — Bem-estar e rotina saudável"
-                      >
-                        3. Confissões do Pet — Bem-estar e rotina saudável
-                      </option>
+                      <option value="1. Casa em Caos (Gases do Pet) — Saúde digestiva, microbiota, Digestive Health">1. Casa em Caos (Gases do Pet) — Saúde digestiva, microbiota, Digestive Health</option>
+                      <option value="2. Drama Felino (Gato Gritando) — Comportamento e imunidade felina">2. Drama Felino (Gato Gritando) — Comportamento e imunidade felina</option>
+                      <option value="3. Confissões do Pet — Bem-estar e rotina saudável">3. Confissões do Pet — Bem-estar e rotina saudável</option>
                     </optgroup>
                     <optgroup label="Rotina / Lifestyle">
-                      <option
-                        value="4. Rotina com Pet Doente — Suplementação preventiva e suporte diário"
-                      >
-                        4. Rotina com Pet Doente — Suplementação preventiva e
-                        suporte diário
-                      </option>
-                      <option
-                        value="5. Momento do Suplemento — Facilidade de uso, pó e soft chews"
-                      >
-                        5. Momento do Suplemento — Facilidade de uso, pó e soft
-                        chews
-                      </option>
-                      <option
-                        value="6. Pós-Banho & Carinho — Saúde da pele e pelagem, Omega 3"
-                      >
-                        6. Pós-Banho & Carinho — Saúde da pele e pelagem, Omega
-                        3
-                      </option>
-                      <option
-                        value="7. Dia de Spa do Pet — Cuidado preventivo, qualidade de vida"
-                      >
-                        7. Dia de Spa do Pet — Cuidado preventivo, qualidade de
-                        vida
-                      </option>
+                      <option value="4. Rotina com Pet Doente — Suplementação preventiva e suporte diário">4. Rotina com Pet Doente — Suplementação preventiva e suporte diário</option>
+                      <option value="5. Momento do Suplemento — Facilidade de uso, pó e soft chews">5. Momento do Suplemento — Facilidade de uso, pó e soft chews</option>
+                      <option value="6. Pós-Banho & Carinho — Saúde da pele e pelagem, Omega 3">6. Pós-Banho & Carinho — Saúde da pele e pelagem, Omega 3</option>
+                      <option value="7. Dia de Spa do Pet — Cuidado preventivo, qualidade de vida">7. Dia de Spa do Pet — Cuidado preventivo, qualidade de vida</option>
                     </optgroup>
                     <optgroup label="Educativo">
-                      <option
-                        value="8. Alergias em Cães — Allergy & Skin Support, Omega 3"
-                      >
-                        8. Alergias em Cães — Allergy & Skin Support, Omega 3
-                      </option>
-                      <option
-                        value="9. Saúde Renal em Gatos — Liver & Kidney, Urinary Support"
-                      >
-                        9. Saúde Renal em Gatos — Liver & Kidney, Urinary
-                        Support
-                      </option>
-                      <option
-                        value="10. Como Escolher Suplementos — Transparência e qualidade"
-                      >
-                        10. Como Escolher Suplementos — Transparência e
-                        qualidade
-                      </option>
-                      <option
-                        value="11. Cheiro das Patas Explicado — Saúde intestinal, Digestive Health"
-                      >
-                        11. Cheiro das Patas Explicado — Saúde intestinal,
-                        Digestive Health
-                      </option>
-                      <option
-                        value="12. Cuidados Diários Essenciais — Rotina preventiva com suplementação"
-                      >
-                        12. Cuidados Diários Essenciais — Rotina preventiva com
-                        suplementação
-                      </option>
+                      <option value="8. Alergias em Cães — Allergy & Skin Support, Omega 3">8. Alergias em Cães — Allergy & Skin Support, Omega 3</option>
+                      <option value="9. Saúde Renal em Gatos — Liver & Kidney, Urinary Support">9. Saúde Renal em Gatos — Liver & Kidney, Urinary Support</option>
+                      <option value="10. Como Escolher Suplementos — Transparência e qualidade">10. Como Escolher Suplementos — Transparência e qualidade</option>
+                      <option value="11. Cheiro das Patas Explicado — Saúde intestinal, Digestive Health">11. Cheiro das Patas Explicado — Saúde intestinal, Digestive Health</option>
+                      <option value="12. Cuidados Diários Essenciais — Rotina preventiva com suplementação">12. Cuidados Diários Essenciais — Rotina preventiva com suplementação</option>
                     </optgroup>
                     <optgroup label="Saúde / Transformação">
-                      <option
-                        value="13. Antes e Depois (Resultados Visuais) — Skin & Coat, Hip & Joint"
-                      >
-                        13. Antes e Depois (Resultados Visuais) — Skin & Coat,
-                        Hip & Joint
-                      </option>
-                      <option
-                        value="14. Mobilidade e Articulação — Hip & Joint Support, Glucosamine"
-                      >
-                        14. Mobilidade e Articulação — Hip & Joint Support,
-                        Glucosamine
-                      </option>
-                      <option
-                        value="15. Pet Pós-Exercício — Joint & Mobility, recuperação"
-                      >
-                        15. Pet Pós-Exercício — Joint & Mobility, recuperação
-                      </option>
+                      <option value="13. Antes e Depois (Resultados Visuais) — Skin & Coat, Hip & Joint">13. Antes e Depois (Resultados Visuais) — Skin & Coat, Hip & Joint</option>
+                      <option value="14. Mobilidade e Articulação — Hip & Joint Support, Glucosamine">14. Mobilidade e Articulação — Hip & Joint Support, Glucosamine</option>
+                      <option value="15. Pet Pós-Exercício — Joint & Mobility, recuperação">15. Pet Pós-Exercício — Joint & Mobility, recuperação</option>
                     </optgroup>
                     <optgroup label="Alimentação">
-                      <option
-                        value="16. Alimentação Natural / Caseira — Saúde intestinal, Digestive Health"
-                      >
-                        16. Alimentação Natural / Caseira — Saúde intestinal,
-                        Digestive Health
-                      </option>
-                      <option
-                        value="17. Montagem de Refeições — Nutrição preventiva + suplementação"
-                      >
-                        17. Montagem de Refeições — Nutrição preventiva +
-                        suplementação
-                      </option>
-                      <option
-                        value="18. Petiscos Saudáveis Caseiros — Bem-estar, ingredientes naturais"
-                      >
-                        18. Petiscos Saudáveis Caseiros — Bem-estar,
-                        ingredientes naturais
-                      </option>
+                      <option value="16. Alimentação Natural / Caseira — Saúde intestinal, Digestive Health">16. Alimentação Natural / Caseira — Saúde intestinal, Digestive Health</option>
+                      <option value="17. Montagem de Refeições — Nutrição preventiva + suplementação">17. Montagem de Refeições — Nutrição preventiva + suplementação</option>
+                      <option value="18. Petiscos Saudáveis Caseiros — Bem-estar, ingredientes naturais">18. Petiscos Saudáveis Caseiros — Bem-estar, ingredientes naturais</option>
                     </optgroup>
                     <optgroup label="Produto (Não Vendedor)">
-                      <option
-                        value="19. Reação ao Suplemento — Experiência real com Coco and Luna"
-                      >
-                        19. Reação ao Suplemento — Experiência real com Coco and
-                        Luna
-                      </option>
-                      <option
-                        value="20. Facilidade de Uso — Praticidade do pó e dos soft chews"
-                      >
-                        20. Facilidade de Uso — Praticidade do pó e dos soft
-                        chews
-                      </option>
-                      <option
-                        value="21. Comparação de Produtos — Qualidade e transparência da marca"
-                      >
-                        21. Comparação de Produtos — Qualidade e transparência
-                        da marca
-                      </option>
-                      <option
-                        value="22. Unboxing / Experiência — Identidade e apresentação da marca"
-                      >
-                        22. Unboxing / Experiência — Identidade e apresentação
-                        da marca
-                      </option>
+                      <option value="19. Reação ao Suplemento — Experiência real com Coco and Luna">19. Reação ao Suplemento — Experiência real com Coco and Luna</option>
+                      <option value="20. Facilidade de Uso — Praticidade do pó e dos soft chews">20. Facilidade de Uso — Praticidade do pó e dos soft chews</option>
+                      <option value="21. Comparação de Produtos — Qualidade e transparência da marca">21. Comparação de Produtos — Qualidade e transparência da marca</option>
+                      <option value="22. Unboxing / Experiência — Identidade e apresentação da marca">22. Unboxing / Experiência — Identidade e apresentação da marca</option>
                     </optgroup>
                     <optgroup label="Conexão Emocional">
-                      <option
-                        value="23. Longevidade do Pet — Suplementação preventiva desde cedo"
-                      >
-                        23. Longevidade do Pet — Suplementação preventiva desde
-                        cedo
-                      </option>
-                      <option
-                        value="24. História de Transformação — Suporte à saúde em todas as fases"
-                      >
-                        24. História de Transformação — Suporte à saúde em todas
-                        as fases
-                      </option>
+                      <option value="23. Longevidade do Pet — Suplementação preventiva desde cedo">23. Longevidade do Pet — Suplementação preventiva desde cedo</option>
+                      <option value="24. História de Transformação — Suporte à saúde em todas as fases">24. História de Transformação — Suporte à saúde em todas as fases</option>
                     </optgroup>
                     <optgroup label="Criativos / Diferenciados">
-                      <option
-                        value="25. Pet em Situações Humanas — Humanização, vínculo tutor-pet"
-                      >
-                        25. Pet em Situações Humanas — Humanização, vínculo
-                        tutor-pet
-                      </option>
-                      <option
-                        value="26. Fantasia / Personagem — Engajamento e top of mind"
-                      >
-                        26. Fantasia / Personagem — Engajamento e top of mind
-                      </option>
-                      <option
-                        value="27. Conteúdos Temáticos — Relevância cultural + saúde preventiva"
-                      >
-                        27. Conteúdos Temáticos — Relevância cultural + saúde
-                        preventiva
-                      </option>
+                      <option value="25. Pet em Situações Humanas — Humanização, vínculo tutor-pet">25. Pet em Situações Humanas — Humanização, vínculo tutor-pet</option>
+                      <option value="26. Fantasia / Personagem — Engajamento e top of mind">26. Fantasia / Personagem — Engajamento e top of mind</option>
+                      <option value="27. Conteúdos Temáticos — Relevância cultural + saúde preventiva">27. Conteúdos Temáticos — Relevância cultural + saúde preventiva</option>
                     </optgroup>
                     <optgroup label="Comportamento">
-                      <option
-                        value="28. Obsessão por Objetos — Saúde mental, bem-estar geral"
-                      >
-                        28. Obsessão por Objetos — Saúde mental, bem-estar geral
-                      </option>
-                      <option
-                        value="29. Recompensa por Comportamento — Rotina saudável"
-                      >
-                        29. Recompensa por Comportamento — Rotina saudável
-                      </option>
+                      <option value="28. Obsessão por Objetos — Saúde mental, bem-estar geral">28. Obsessão por Objetos — Saúde mental, bem-estar geral</option>
+                      <option value="29. Recompensa por Comportamento — Rotina saudável">29. Recompensa por Comportamento — Rotina saudável</option>
                     </optgroup>
                     <optgroup label="Outros">
-                      <option
-                        value="30. Cuidados com Filhotes — Prevenção desde cedo"
-                      >
-                        30. Cuidados com Filhotes — Prevenção desde cedo
-                      </option>
-                      <option
-                        value="31. Conversa Natural sobre Produto — Confiança na marca"
-                      >
-                        31. Conversa Natural sobre Produto — Confiança na marca
-                      </option>
-                      <option
-                        value="32. Múltiplos Pets em Casa — Suplementação para cães e gatos"
-                      >
-                        32. Múltiplos Pets em Casa — Suplementação para cães e
-                        gatos
-                      </option>
-                      <option
-                        value="33. Saúde Bucal (Adaptado) — Saúde preventiva integrada"
-                      >
-                        33. Saúde Bucal (Adaptado) — Saúde preventiva integrada
-                      </option>
-                      <option
-                        value="34. Produto como Apoio (Não Protagonista) — Todos os produtos"
-                      >
-                        34. Produto como Apoio (Não Protagonista) — Todos os
-                        produtos
-                      </option>
+                      <option value="30. Cuidados com Filhotes — Prevenção desde cedo">30. Cuidados com Filhotes — Prevenção desde cedo</option>
+                      <option value="31. Conversa Natural sobre Produto — Confiança na marca">31. Conversa Natural sobre Produto — Confiança na marca</option>
+                      <option value="32. Múltiplos Pets em Casa — Suplementação para cães e gatos">32. Múltiplos Pets em Casa — Suplementação para cães e gatos</option>
+                      <option value="33. Saúde Bucal (Adaptado) — Saúde preventiva integrada">33. Saúde Bucal (Adaptado) — Saúde preventiva integrada</option>
+                      <option value="34. Produto como Apoio (Não Protagonista) — Todos os produtos">34. Produto como Apoio (Não Protagonista) — Todos os produtos</option>
                     </optgroup>
                   </select>
                 </div>
@@ -852,463 +178,119 @@
                 <div class="col-12">
                   <label class="form-label">Gancho de Abertura</label>
                   <select id="gancho" class="form-select" required>
-                    <option value="" disabled selected>
-                      Selecione um gancho validado...
-                    </option>
+                    <option value="" disabled selected>Selecione um gancho validado...</option>
                     <optgroup label="Segredos & Truques">
-                      <option
-                        value="1. Os truques proibidos que todo tutor de cachorro deveria saber..."
-                      >
-                        1. Os truques proibidos que todo tutor de cachorro
-                        deveria saber...
-                      </option>
-                      <option
-                        value="2. Existe um lado obscuro da ração que a maioria dos tutores não sabe."
-                      >
-                        2. Existe um lado obscuro da ração que a maioria dos
-                        tutores não sabe.
-                      </option>
-                      <option
-                        value="3. Olha o que veterinários cobram pra te ensinar isso..."
-                      >
-                        3. Olha o que veterinários cobram pra te ensinar isso...
-                      </option>
-                      <option
-                        value="4. O que só os tutores mais informados sabem mas guardam a sete chaves."
-                      >
-                        4. O que só os tutores mais informados sabem mas guardam
-                        a sete chaves.
-                      </option>
-                      <option
-                        value="5. O que nenhum veterinário teve coragem de te contar sobre a saúde do seu gato."
-                      >
-                        5. O que nenhum veterinário teve coragem de te contar
-                        sobre a saúde do seu gato.
-                      </option>
-                      <option
-                        value="6. Se você ainda acha que ração seca sozinha é suficiente pra saúde do seu gato..."
-                      >
-                        6. Se você ainda acha que ração seca sozinha é
-                        suficiente pra saúde do seu gato...
-                      </option>
+                      <option value="1. Os truques proibidos que todo tutor de cachorro deveria saber...">1. Os truques proibidos que todo tutor de cachorro deveria saber...</option>
+                      <option value="2. Existe um lado obscuro da ração que a maioria dos tutores não sabe.">2. Existe um lado obscuro da ração que a maioria dos tutores não sabe.</option>
+                      <option value="3. Olha o que veterinários cobram pra te ensinar isso...">3. Olha o que veterinários cobram pra te ensinar isso...</option>
+                      <option value="4. O que só os tutores mais informados sabem mas guardam a sete chaves.">4. O que só os tutores mais informados sabem mas guardam a sete chaves.</option>
+                      <option value="5. O que nenhum veterinário teve coragem de te contar sobre a saúde do seu gato.">5. O que nenhum veterinário teve coragem de te contar sobre a saúde do seu gato.</option>
+                      <option value="6. Se você ainda acha que ração seca sozinha é suficiente pra saúde do seu gato...">6. Se você ainda acha que ração seca sozinha é suficiente pra saúde do seu gato...</option>
                     </optgroup>
                     <optgroup label="Momentos Reais de Tutor">
-                      <option
-                        value="7. Você consegue saber se seu cachorro te ama de verdade ou só ama o seu lanche?"
-                      >
-                        7. Você consegue saber se seu cachorro te ama de verdade
-                        ou só ama o seu lanche?
-                      </option>
-                      <option
-                        value="8. Conselhos que parecem certos mas prejudicam a saúde do seu cachorro."
-                      >
-                        8. Conselhos que parecem certos mas prejudicam a saúde
-                        do seu cachorro.
-                      </option>
-                      <option
-                        value="9. Vida de cachorro bem cuidado vs vida de cachorro negligenciado. Qual a vida do seu?"
-                      >
-                        9. Vida de cachorro bem cuidado vs vida de cachorro
-                        negligenciado. Qual a vida do seu?
-                      </option>
-                      <option
-                        value="10. Provando que você não é um tutor descuidado - só está desinformado."
-                      >
-                        10. Provando que você não é um tutor descuidado - só
-                        está desinformado.
-                      </option>
-                      <option
-                        value="11. Coisas que só existem na internet - edição tutor de pet."
-                      >
-                        11. Coisas que só existem na internet - edição tutor de
-                        pet.
-                      </option>
-                      <option
-                        value="12. Informações do mundo pet que você precisa saber pra cuidar melhor do seu bichinho."
-                      >
-                        12. Informações do mundo pet que você precisa saber pra
-                        cuidar melhor do seu bichinho.
-                      </option>
-                      <option
-                        value="13. Com quantos anos você descobriu que tava dando água pro seu cachorro errado?"
-                      >
-                        13. Com quantos anos você descobriu que tava dando água
-                        pro seu cachorro errado?
-                      </option>
+                      <option value="7. Você consegue saber se seu cachorro te ama de verdade ou só ama o seu lanche?">7. Você consegue saber se seu cachorro te ama de verdade ou só ama o seu lanche?</option>
+                      <option value="8. Conselhos que parecem certos mas prejudicam a saúde do seu cachorro.">8. Conselhos que parecem certos mas prejudicam a saúde do seu cachorro.</option>
+                      <option value="9. Vida de cachorro bem cuidado vs vida de cachorro negligenciado. Qual a vida do seu?">9. Vida de cachorro bem cuidado vs vida de cachorro negligenciado. Qual a vida do seu?</option>
+                      <option value="10. Provando que você não é um tutor descuidado - só está desinformado.">10. Provando que você não é um tutor descuidado - só está desinformado.</option>
+                      <option value="11. Coisas que só existem na internet - edição tutor de pet.">11. Coisas que só existem na internet - edição tutor de pet.</option>
+                      <option value="12. Informações do mundo pet que você precisa saber pra cuidar melhor do seu bichinho.">12. Informações do mundo pet que você precisa saber pra cuidar melhor do seu bichinho.</option>
+                      <option value="13. Com quantos anos você descobriu que tava dando água pro seu cachorro errado?">13. Com quantos anos você descobriu que tava dando água pro seu cachorro errado?</option>
                     </optgroup>
                     <optgroup label="Emoção & Storytelling">
-                      <option
-                        value="14. A gente levou anos pra aprender isso sobre pets. Vamos te ensinar em menos de 1 minuto."
-                      >
-                        14. A gente levou anos pra aprender isso sobre pets.
-                        Vamos te ensinar em menos de 1 minuto.
-                      </option>
-                      <option
-                        value="15. E foi assim que esse cachorro de 12 anos se tornou o sénior mais saudável do bairro."
-                      >
-                        15. E foi assim que esse cachorro de 12 anos se tornou o
-                        sénior mais saudável do bairro.
-                      </option>
-                      <option
-                        value="16. Desde que a gente começou a entender a linguagem corporal dos pets, tudo mudou."
-                      >
-                        16. Desde que a gente começou a entender a linguagem
-                        corporal dos pets, tudo mudou.
-                      </option>
-                      <option
-                        value="17. Como parar de se sentir culpado toda vez que deixa o cachorro em casa sozinho."
-                      >
-                        17. Como parar de se sentir culpado toda vez que deixa o
-                        cachorro em casa sozinho.
-                      </option>
-                      <option
-                        value="18. É assim que a vida do seu cachorro parece antes, durante e depois de descobrir o que ele precisa."
-                      >
-                        18. É assim que a vida do seu cachorro parece antes,
-                        durante e depois de descobrir o que ele precisa.
-                      </option>
-                      <option
-                        value="19. Há um ano, esse gato quase foi devolvido porque ninguém sabia o que havia de errado."
-                      >
-                        19. Há um ano, esse gato quase foi devolvido porque
-                        ninguém sabia o que havia de errado.
-                      </option>
-                      <option
-                        value="20. Hoje esse cachorro corre como filhote aos 10 anos..."
-                      >
-                        20. Hoje esse cachorro corre como filhote aos 10 anos...
-                      </option>
-                      <option
-                        value="21. Coisas que a gente gostaria de saber no começo - não depois de anos tentando e errando."
-                      >
-                        21. Coisas que a gente gostaria de saber no começo - não
-                        depois de anos tentando e errando.
-                      </option>
+                      <option value="14. A gente levou anos pra aprender isso sobre pets. Vamos te ensinar em menos de 1 minuto.">14. A gente levou anos pra aprender isso sobre pets. Vamos te ensinar em menos de 1 minuto.</option>
+                      <option value="15. E foi assim que esse cachorro de 12 anos se tornou o sénior mais saudável do bairro.">15. E foi assim que esse cachorro de 12 anos se tornou o sénior mais saudável do bairro.</option>
+                      <option value="16. Desde que a gente começou a entender a linguagem corporal dos pets, tudo mudou.">16. Desde que a gente começou a entender a linguagem corporal dos pets, tudo mudou.</option>
+                      <option value="17. Como parar de se sentir culpado toda vez que deixa o cachorro em casa sozinho.">17. Como parar de se sentir culpado toda vez que deixa o cachorro em casa sozinho.</option>
+                      <option value="18. É assim que a vida do seu cachorro parece antes, durante e depois de descobrir o que ele precisa.">18. É assim que a vida do seu cachorro parece antes, durante e depois de descobrir o que ele precisa.</option>
+                      <option value="19. Há um ano, esse gato quase foi devolvido porque ninguém sabia o que havia de errado.">19. Há um ano, esse gato quase foi devolvido porque ninguém sabia o que havia de errado.</option>
+                      <option value="20. Hoje esse cachorro corre como filhote aos 10 anos...">20. Hoje esse cachorro corre como filhote aos 10 anos...</option>
+                      <option value="21. Coisas que a gente gostaria de saber no começo - não depois de anos tentando e errando.">21. Coisas que a gente gostaria de saber no começo - não depois de anos tentando e errando.</option>
                     </optgroup>
                     <optgroup label="Educação & Quebrando Mitos">
-                      <option
-                        value="22. O dinheiro pode comprar a ração mais cara mas não pode comprar uma barriga saudável."
-                      >
-                        22. O dinheiro pode comprar a ração mais cara mas não
-                        pode comprar uma barriga saudável.
-                      </option>
-                      <option
-                        value="23. O que realmente acontece com o seu cachorro se ele ficar 30 dias sem sair de casa?"
-                      >
-                        23. O que realmente acontece com o seu cachorro se ele
-                        ficar 30 dias sem sair de casa?
-                      </option>
-                      <option
-                        value="24. Explicando a saúde intestinal do seu gato como se fosse o cano da pia da cozinha."
-                      >
-                        24. Explicando a saúde intestinal do seu gato como se
-                        fosse o cano da pia da cozinha.
-                      </option>
-                      <option
-                        value="25. Se você é o único tutor que não sabe isso sobre a digestão do cachorro..."
-                      >
-                        25. Se você é o único tutor que não sabe isso sobre a
-                        digestão do cachorro...
-                      </option>
-                      <option
-                        value="26. 5 coisas que aprendemos em anos trabalhando com pets em 60 segundos."
-                      >
-                        26. 5 coisas que aprendemos em anos trabalhando com pets
-                        em 60 segundos.
-                      </option>
-                      <option
-                        value="27. Verdades que a gente gostaria que todo tutor soubesse - vindas de quem vive nisso há anos."
-                      >
-                        27. Verdades que a gente gostaria que todo tutor
-                        soubesse - vindas de quem vive nisso há anos.
-                      </option>
-                      <option
-                        value="28. Anos de aprendizado com pets resumidos em 60 segundos."
-                      >
-                        28. Anos de aprendizado com pets resumidos em 60
-                        segundos.
-                      </option>
-                      <option
-                        value="29. Todo mundo cresceu achando que cuidar da pelagem do cachorro era só estética..."
-                      >
-                        29. Todo mundo cresceu achando que cuidar da pelagem do
-                        cachorro era só estética...
-                      </option>
-                      <option
-                        value="30. Se não te ensinaram a ler um rótulo de ração direito a gente ensina agora."
-                      >
-                        30. Se não te ensinaram a ler um rótulo de ração direito
-                        a gente ensina agora.
-                      </option>
-                      <option
-                        value="31. Em 60 segundos vamos te ensinar mais sobre comportamento felino do que na vida toda."
-                      >
-                        31. Em 60 segundos vamos te ensinar mais sobre
-                        comportamento felino do que na vida toda.
-                      </option>
-                      <option
-                        value="32. Como saber se o seu cachorro está feliz de verdade sem precisar adivinhar."
-                      >
-                        32. Como saber se o seu cachorro está feliz de verdade
-                        sem precisar adivinhar.
-                      </option>
-                      <option
-                        value="33. Erros de cuidados com o pet que você provavelmente está cometendo agora mesmo."
-                      >
-                        33. Erros de cuidados com o pet que você provavelmente
-                        está cometendo agora mesmo.
-                      </option>
+                      <option value="22. O dinheiro pode comprar a ração mais cara mas não pode comprar uma barriga saudável.">22. O dinheiro pode comprar a ração mais cara mas não pode comprar uma barriga saudável.</option>
+                      <option value="23. O que realmente acontece com o seu cachorro se ele ficar 30 dias sem sair de casa?">23. O que realmente acontece com o seu cachorro se ele ficar 30 dias sem sair de casa?</option>
+                      <option value="24. Explicando a saúde intestinal do seu gato como se fosse o cano da pia da cozinha.">24. Explicando a saúde intestinal do seu gato como se fosse o cano da pia da cozinha.</option>
+                      <option value="25. Se você é o único tutor que não sabe isso sobre a digestão do cachorro...">25. Se você é o único tutor que não sabe isso sobre a digestão do cachorro...</option>
+                      <option value="26. 5 coisas que aprendemos em anos trabalhando com pets em 60 segundos.">26. 5 coisas que aprendemos em anos trabalhando com pets em 60 segundos.</option>
+                      <option value="27. Verdades que a gente gostaria que todo tutor soubesse - vindas de quem vive nisso há anos.">27. Verdades que a gente gostaria que todo tutor soubesse - vindas de quem vive nisso há anos.</option>
+                      <option value="28. Anos de aprendizado com pets resumidos em 60 segundos.">28. Anos de aprendizado com pets resumidos em 60 segundos.</option>
+                      <option value="29. Todo mundo cresceu achando que cuidar da pelagem do cachorro era só estética...">29. Todo mundo cresceu achando que cuidar da pelagem do cachorro era só estética...</option>
+                      <option value="30. Se não te ensinaram a ler um rótulo de ração direito a gente ensina agora.">30. Se não te ensinaram a ler um rótulo de ração direito a gente ensina agora.</option>
+                      <option value="31. Em 60 segundos vamos te ensinar mais sobre comportamento felino do que na vida toda.">31. Em 60 segundos vamos te ensinar mais sobre comportamento felino do que na vida toda.</option>
+                      <option value="32. Como saber se o seu cachorro está feliz de verdade sem precisar adivinhar.">32. Como saber se o seu cachorro está feliz de verdade sem precisar adivinhar.</option>
+                      <option value="33. Erros de cuidados com o pet que você provavelmente está cometendo agora mesmo.">33. Erros de cuidados com o pet que você provavelmente está cometendo agora mesmo.</option>
                     </optgroup>
                     <optgroup label="Curiosidade & Loop Aberto">
-                      <option
-                        value="34. Tem algo acontecendo no mundo pet que todo tutor de cachorro precisa saber."
-                      >
-                        34. Tem algo acontecendo no mundo pet que todo tutor de
-                        cachorro precisa saber.
-                      </option>
-                      <option
-                        value="35. São os mesmos sintomas mas o primeiro cachorro piorou e o segundo se recuperou."
-                      >
-                        35. São os mesmos sintomas mas o primeiro cachorro
-                        piorou e o segundo se recuperou.
-                      </option>
-                      <option
-                        value="36. É assim que a gente hackeia a rotina de saúde articular do cachorro..."
-                      >
-                        36. É assim que a gente hackeia a rotina de saúde
-                        articular do cachorro...
-                      </option>
-                      <option
-                        value="37. Dar a ração errada pro seu gato todo dia pode fazer isso com os rins dele."
-                      >
-                        37. Dar a ração errada pro seu gato todo dia pode fazer
-                        isso com os rins dele.
-                      </option>
-                      <option
-                        value="38. Fazer uma coisa simples todo dia pode transformar a pelagem do seu cachorro em 30 dias."
-                      >
-                        38. Fazer uma coisa simples todo dia pode transformar a
-                        pelagem do seu cachorro em 30 dias.
-                      </option>
-                      <option
-                        value="39. Parece contra-intuitivo, mas deixar seu cachorro entediado de propósito pode deixá-lo mais saudável."
-                      >
-                        39. Parece contra-intuitivo, mas deixar seu cachorro
-                        entediado de propósito pode deixá-lo mais saudável.
-                      </option>
-                      <option
-                        value="40. Existe uma forma de acalmar cachorro ansioso em segundos..."
-                      >
-                        40. Existe uma forma de acalmar cachorro ansioso em
-                        segundos...
-                      </option>
-                      <option
-                        value="41. Enquanto você debatia ração natural vs industrial, uma outra conversa vai mudar tudo."
-                      >
-                        41. Enquanto você debatia ração natural vs industrial,
-                        uma outra conversa vai mudar tudo.
-                      </option>
+                      <option value="34. Tem algo acontecendo no mundo pet que todo tutor de cachorro precisa saber.">34. Tem algo acontecendo no mundo pet que todo tutor de cachorro precisa saber.</option>
+                      <option value="35. São os mesmos sintomas mas o primeiro cachorro piorou e o segundo se recuperou.">35. São os mesmos sintomas mas o primeiro cachorro piorou e o segundo se recuperou.</option>
+                      <option value="36. É assim que a gente hackeia a rotina de saúde articular do cachorro...">36. É assim que a gente hackeia a rotina de saúde articular do cachorro...</option>
+                      <option value="37. Dar a ração errada pro seu gato todo dia pode fazer isso com os rins dele.">37. Dar a ração errada pro seu gato todo dia pode fazer isso com os rins dele.</option>
+                      <option value="38. Fazer uma coisa simples todo dia pode transformar a pelagem do seu cachorro em 30 dias.">38. Fazer uma coisa simples todo dia pode transformar a pelagem do seu cachorro em 30 dias.</option>
+                      <option value="39. Parece contra-intuitivo, mas deixar seu cachorro entediado de propósito pode deixá-lo mais saudável.">39. Parece contra-intuitivo, mas deixar seu cachorro entediado de propósito pode deixá-lo mais saudável.</option>
+                      <option value="40. Existe uma forma de acalmar cachorro ansioso em segundos...">40. Existe uma forma de acalmar cachorro ansioso em segundos...</option>
+                      <option value="41. Enquanto você debatia ração natural vs industrial, uma outra conversa vai mudar tudo.">41. Enquanto você debatia ração natural vs industrial, uma outra conversa vai mudar tudo.</option>
                     </optgroup>
                     <optgroup label="Antes & Depois / Contraste">
-                      <option
-                        value="42. Testamos dezenas de rotinas para a digestão do cachorro até achar o detalhe crucial."
-                      >
-                        42. Testamos dezenas de rotinas para a digestão do
-                        cachorro até achar o detalhe crucial.
-                      </option>
-                      <option
-                        value="43. Esse cachorro mal conseguia subir a escada. Hoje corre no parque."
-                      >
-                        43. Esse cachorro mal conseguia subir a escada. Hoje
-                        corre no parque.
-                      </option>
-                      <option
-                        value="44. Em 2 anos, esse cachorro senior foi disso... pra isso em energia e mobilidade."
-                      >
-                        44. Em 2 anos, esse cachorro senior foi disso... pra
-                        isso em energia e mobilidade.
-                      </option>
-                      <option
-                        value="45. É assim que o intestino do seu cachorro parece comendo ração ultraprocessada."
-                      >
-                        45. É assim que o intestino do seu cachorro parece
-                        comendo ração ultraprocessada.
-                      </option>
+                      <option value="42. Testamos dezenas de rotinas para a digestão do cachorro até achar o detalhe crucial.">42. Testamos dezenas de rotinas para a digestão do cachorro até achar o detalhe crucial.</option>
+                      <option value="43. Esse cachorro mal conseguia subir a escada. Hoje corre no parque.">43. Esse cachorro mal conseguia subir a escada. Hoje corre no parque.</option>
+                      <option value="44. Em 2 anos, esse cachorro senior foi disso... pra isso em energia e mobilidade.">44. Em 2 anos, esse cachorro senior foi disso... pra isso em energia e mobilidade.</option>
+                      <option value="45. É assim que o intestino do seu cachorro parece comendo ração ultraprocessada.">45. É assim que o intestino do seu cachorro parece comendo ração ultraprocessada.</option>
                     </optgroup>
                     <optgroup label="Fácil, Rápido & Para Tutores Ocupados">
-                      <option
-                        value="46. Se você não tem tempo para um passeio longo com seu cachorro faça isso."
-                      >
-                        46. Se você não tem tempo para um passeio longo com seu
-                        cachorro faça isso.
-                      </option>
-                      <option
-                        value="47. Tudo que dá pra melhorar na saúde do seu cachorro com apenas 5 minutos por dia."
-                      >
-                        47. Tudo que dá pra melhorar na saúde do seu cachorro
-                        com apenas 5 minutos por dia.
-                      </option>
-                      <option
-                        value="48. Maneiras simples mas efetivas pra melhorar a rotina de saúde do seu gato."
-                      >
-                        48. Maneiras simples mas efetivas pra melhorar a rotina
-                        de saúde do seu gato.
-                      </option>
-                      <option
-                        value="49. É isso que fazemos toda manhã com os pets daqui e por que o veterinário gosta."
-                      >
-                        49. É isso que fazemos toda manhã com os pets daqui e
-                        por que o veterinário gosta.
-                      </option>
-                      <option
-                        value="50. Se você não tem uma rotina de cuidados pra o seu cachorro comece com essa versão mínima."
-                      >
-                        50. Se você não tem uma rotina de cuidados pra o seu
-                        cachorro comece com essa versão mínima.
-                      </option>
+                      <option value="46. Se você não tem tempo para um passeio longo com seu cachorro faça isso.">46. Se você não tem tempo para um passeio longo com seu cachorro faça isso.</option>
+                      <option value="47. Tudo que dá pra melhorar na saúde do seu cachorro com apenas 5 minutos por dia.">47. Tudo que dá pra melhorar na saúde do seu cachorro com apenas 5 minutos por dia.</option>
+                      <option value="48. Maneiras simples mas efetivas pra melhorar a rotina de saúde do seu gato.">48. Maneiras simples mas efetivas pra melhorar a rotina de saúde do seu gato.</option>
+                      <option value="49. É isso que fazemos toda manhã com os pets daqui e por que o veterinário gosta.">49. É isso que fazemos toda manhã com os pets daqui e por que o veterinário gosta.</option>
+                      <option value="50. Se você não tem uma rotina de cuidados pra o seu cachorro comece com essa versão mínima.">50. Se você não tem uma rotina de cuidados pra o seu cachorro comece com essa versão mínima.</option>
                     </optgroup>
                     <optgroup label="Aspiracional & Identidade de Tutor">
-                      <option
-                        value="51. Você PODE ter um cachorro senior saudável e feliz sem gastar uma fortuna no veterinário."
-                      >
-                        51. Você PODE ter um cachorro senior saudável e feliz
-                        sem gastar uma fortuna no veterinário.
-                      </option>
-                      <option
-                        value="52. Existe uma diferença enorme entre um tutor iniciante e alguém que realmente entende de animais."
-                      >
-                        52. Existe uma diferença enorme entre um tutor iniciante
-                        e alguém que realmente entende de animais.
-                      </option>
-                      <option
-                        value="53. 5 coisas que os tutores de cachorro mais dedicados estão fazendo diferente em 2025."
-                      >
-                        53. 5 coisas que os tutores de cachorro mais dedicados
-                        estão fazendo diferente em 2025.
-                      </option>
-                      <option
-                        value="54. Essas são as 3 coisas que todo tutor responsável de gato deveria saber antes do gato completar 5 anos."
-                      >
-                        54. Essas são as 3 coisas que todo tutor responsável de
-                        gato deveria saber antes do gato completar 5 anos.
-                      </option>
-                      <option
-                        value="55. Coisas que a gente não permite na rotina dos pets daqui - principalmente por conta do que sabe."
-                      >
-                        55. Coisas que a gente não permite na rotina dos pets
-                        daqui - mainly por conta do que sabe.
-                      </option>
-                      <option
-                        value="56. Coisas que a gente não compactua trabalhando com saúde animal há anos."
-                      >
-                        56. Coisas que a gente não compactua trabalhando com
-                        saúde animal há anos.
-                      </option>
+                      <option value="51. Você PODE ter um cachorro senior saudável e feliz sem gastar uma fortuna no veterinário.">51. Você PODE ter um cachorro senior saudável e feliz sem gastar uma fortuna no veterinário.</option>
+                      <option value="52. Existe uma diferença enorme entre um tutor iniciante e alguém que realmente entende de animais.">52. Existe uma diferença enorme entre um tutor iniciante e alguém que realmente entende de animais.</option>
+                      <option value="53. 5 coisas que os tutores de cachorro mais dedicados estão fazendo diferente em 2025.">53. 5 coisas que os tutores de cachorro mais dedicados estão fazendo diferente em 2025.</option>
+                      <option value="54. Essas são as 3 coisas que todo tutor responsável de gato deveria saber antes do gato completar 5 anos.">54. Essas são as 3 coisas que todo tutor responsável de gato deveria saber antes do gato completar 5 anos.</option>
+                      <option value="55. Coisas que a gente não permite na rotina dos pets daqui - principalmente por conta do que sabe.">55. Coisas que a gente não permite na rotina dos pets daqui - mainly por conta do que sabe.</option>
+                      <option value="56. Coisas que a gente não compactua trabalhando com saúde animal há anos.">56. Coisas que a gente não compactua trabalhando com saúde animal há anos.</option>
                     </optgroup>
                     <optgroup label="Recomendações & Listas">
-                      <option
-                        value="57. Documentários, livros e canais que vão te tornar um tutor muito melhor sem você nem perceber."
-                      >
-                        57. Documentários, livros e canais que vão te tornar um
-                        tutor muito melhor sem você nem perceber.
-                      </option>
-                      <option
-                        value="58. 3 documentários sobre comportamento animal que vão mudar a forma como você vê o seu pet pra sempre."
-                      >
-                        58. 3 documentários sobre comportamento animal que vão
-                        mudar a forma como você vê o seu pet pra sempre.
-                      </option>
-                      <option
-                        value="59. 5 dicas pra manter o seu cachorro sênior confortável mesmo que ele já tenha problemas articulares."
-                      >
-                        59. 5 dicas pra manter o seu cachorro sênior confortável
-                        mesmo que ele já tenha problemas articulares.
-                      </option>
+                      <option value="57. Documentários, livros e canais que vão te tornar um tutor muito melhor sem você nem perceber.">57. Documentários, livros e canais que vão te tornar um tutor muito melhor sem você nem perceber.</option>
+                      <option value="58. 3 documentários sobre comportamento animal que vão mudar a forma como você vê o seu pet pra sempre.">58. 3 documentários sobre comportamento animal que vão mudar a forma como você vê o seu pet pra sempre.</option>
+                      <option value="59. 5 dicas pra manter o seu cachorro sênior confortável mesmo que ele já tenha problemas articulares.">59. 5 dicas pra manter o seu cachorro sênior confortável mesmo que ele já tenha problemas articulares.</option>
                     </optgroup>
                     <optgroup label="Urgência & Tempo">
-                      <option
-                        value="60. Se o seu cachorro tem 7 anos ou mais, essas são as 5 coisas que você precisa começar a fazer agora."
-                      >
-                        60. Se o seu cachorro tem 7 anos ou mais, essas são as 5
-                        coisas que você precisa começar a fazer agora.
-                      </option>
-                      <option
-                        value="61. Ração seca ou ração úmida? Qual é melhor pra saúde dos rins do seu gato?"
-                      >
-                        61. Ração seca ou ração úmida? Qual é melhor pra saúde
-                        dos rins do seu gato?
-                      </option>
-                      <option
-                        value="62. Se o seu cachorro coça muito tem 3 coisas que você precisa verificar com urgência."
-                      >
-                        62. Se o seu cachorro coça muito tem 3 coisas que você
-                        precisa verificar com urgência.
-                      </option>
-                      <option
-                        value="63. Trocas inúteis que tutores de pet fazem o tempo todo e que não mudam nada na prática."
-                      >
-                        63. Trocas inúteis que tutores de pet fazem o tempo todo
-                        e que não mudam nada na prática.
-                      </option>
-                      <option
-                        value="64. Acabou de adotar um cachorro? Não pule essas 3 coisas na primeira semana."
-                      >
-                        64. Acabou de adotar um cachorro? Não pule essas 3
-                        coisas na primeira semana.
-                      </option>
+                      <option value="60. Se o seu cachorro tem 7 anos ou mais, essas são as 5 coisas que você precisa começar a fazer agora.">60. Se o seu cachorro tem 7 anos ou mais, essas são as 5 coisas que você precisa começar a fazer agora.</option>
+                      <option value="61. Ração seca ou ração úmida? Qual é melhor pra saúde dos rins do seu gato?">61. Ração seca ou ração úmida? Qual é melhor pra saúde dos rins do seu gato?</option>
+                      <option value="62. Se o seu cachorro coça muito tem 3 coisas que você precisa verificar com urgência.">62. Se o seu cachorro coça muito tem 3 coisas que você precisa verificar com urgência.</option>
+                      <option value="63. Trocas inúteis que tutores de pet fazem o tempo todo e que não mudam nada na prática.">63. Trocas inúteis que tutores de pet fazem o tempo todo e que não mudam nada na prática.</option>
+                      <option value="64. Acabou de adotar um cachorro? Não pule essas 3 coisas na primeira semana.">64. Acabou de adotar um cachorro? Não pule essas 3 coisas na primeira semana. </option>
                     </optgroup>
                   </select>
                 </div>
 
                 <div class="col-12">
-                  <div
-                    class="d-flex justify-content-between align-items-end mb-2 w-100"
-                  >
+                  <div class="d-flex justify-content-between align-items-end mb-2 w-100">
                     <label class="form-label m-0">Notas Adicionais</label>
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-panel rounded-pill px-3 py-1 shadow-sm bg-transparent"
-                      onclick="document.getElementById('anexoInput').click()"
-                      title="Adicionar Documentos"
-                    >
+                    <button type="button" class="btn btn-sm btn-panel rounded-pill px-3 py-1 shadow-sm bg-transparent" onclick="document.getElementById('anexoInput').click()" title="Adicionar Documentos">
                       Anexar Arquivos
                     </button>
                   </div>
-                  <textarea
-                    id="notas"
-                    class="form-control"
-                    rows="3"
-                    placeholder="Insira direcionamentos extras ou contexto para o Claude..."
-                  ></textarea>
+                  <textarea id="notas" class="form-control" rows="3" placeholder="Insira direcionamentos extras ou contexto para o Claude..."></textarea>
 
                   <input type="file" id="anexoInput" class="d-none" multiple />
-                  <div
-                    id="anexoPreview"
-                    class="mt-3 d-flex flex-column gap-2"
-                  ></div>
+                  <div id="anexoPreview" class="mt-3 d-flex flex-column gap-2"></div>
                 </div>
 
                 <div class="col-12 d-flex mobile-stack gap-3 mt-4">
-                  <button
-                    type="button"
-                    onclick="gerarAleatorio()"
-                    class="btn btn-random w-25 fw-bold text-nowrap"
-                  >
+                  <button type="button" onclick="gerarAleatorio()" class="btn btn-random w-25 fw-bold text-nowrap">
                     Aleatório
                   </button>
-                  <button
-                    type="submit"
-                    class="btn btn-primary flex-grow-1 fw-bold fs-6"
-                  >
+                  <button type="submit" class="btn btn-primary flex-grow-1 fw-bold fs-6">
                     Gerar Roteiro
                   </button>
                 </div>
 
                 <div class="col-12 text-center mt-3">
                   <small class="api-info text-muted">
-                    Conectado à API Stateless da Anthropic (Claude Opus). O
-                    modelo não retém memória para garantir criatividade bruta em
-                    cada nova geração.
+                    Conectado à API Stateless da Anthropic (Claude Opus). O modelo não retém memória para garantir criatividade bruta em cada nova geração.
                   </small>
                 </div>
               </div>
@@ -1316,64 +298,26 @@
           </div>
 
           <div id="painelRevisao" class="card p-5 d-none text-center">
-            <h4 class="fw-bold mb-4 text-dark">
-              Confirmar Estratégia de Conteúdo
-            </h4>
-            <div
-              class="text-start bg-light p-4 rounded mb-5 border"
-              id="resumoCombinacao"
-              style="font-size: 0.95rem; line-height: 1.6"
-            ></div>
+            <h4 class="fw-bold mb-4 text-dark">Confirmar Estratégia de Conteúdo</h4>
+            <div class="text-start bg-light p-4 rounded mb-5 border" id="resumoCombinacao" style="font-size: 0.95rem; line-height: 1.6"></div>
             <div class="d-flex mobile-stack gap-3">
-              <button
-                onclick="voltarEdicao()"
-                class="btn btn-light border flex-grow-1 text-dark bg-transparent"
-              >
-                Voltar
-              </button>
-              <button
-                onclick="gerarAleatorio()"
-                class="btn btn-outline-primary flex-grow-1"
-              >
-                Girar Aleatório
-              </button>
-              <button
-                onclick="confirmarEnvio()"
-                class="btn btn-primary flex-grow-1"
-              >
-                Confirmar e Gerar
-              </button>
+              <button onclick="voltarEdicao()" class="btn btn-light border flex-grow-1 text-dark bg-transparent">Voltar</button>
+              <button onclick="gerarAleatorio()" class="btn btn-outline-primary flex-grow-1">Girar Aleatório</button>
+              <button onclick="confirmarEnvio()" class="btn btn-primary flex-grow-1">Confirmar e Gerar</button>
             </div>
           </div>
 
           <div id="painelConfiguracoes" class="card p-5 d-none">
-            <div
-              class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3"
-            >
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
               <h4 class="m-0 text-dark fw-bold">Gerenciar Variáveis da IA</h4>
               <div class="d-flex gap-2">
-                <button
-                  onclick="abrirLixeira()"
-                  class="btn btn-outline-danger fw-bold px-4"
-                >
-                  Lixeira
-                </button>
-                <button
-                  onclick="novaSessao()"
-                  class="btn btn-light border text-dark fw-bold px-4 bg-transparent"
-                >
-                  Fechar
-                </button>
+                <button onclick="abrirLixeira()" class="btn btn-outline-danger fw-bold px-4">Lixeira</button>
+                <button onclick="novaSessao()" class="btn btn-light border text-dark fw-bold px-4 bg-transparent">Fechar</button>
               </div>
             </div>
 
-            <div
-              class="bg-light p-4 rounded border mb-5"
-              id="areaFormNovaOpcao"
-            >
-              <h6 class="text-brand-blue fw-bold mb-3" id="tituloFormOpcao">
-                Adicionar Nova Variável
-              </h6>
+            <div class="bg-light p-4 rounded border mb-5" id="areaFormNovaOpcao">
+              <h6 class="text-brand-blue fw-bold mb-3" id="tituloFormOpcao">Adicionar Nova Variável</h6>
               <div class="row g-3 align-items-end">
                 <div class="col-md-3">
                   <label class="form-label small">Categoria</label>
@@ -1387,52 +331,27 @@
                 </div>
                 <div class="col-md-9">
                   <label class="form-label small">Título Público</label>
-                  <input
-                    type="text"
-                    id="novoTitulo"
-                    class="form-control border-primary"
-                    placeholder="Nome que aparecerá na lista"
-                  />
+                  <input type="text" id="novoTitulo" class="form-control border-primary" placeholder="Nome que aparecerá na lista" />
                 </div>
                 <div class="col-md-9">
-                  <label class="form-label small"
-                    >Contexto Estratégico (Oculto - Apenas para a IA)</label
-                  >
-                  <textarea
-                    id="novaExplicacao"
-                    class="form-control border-primary"
-                    rows="2"
-                    placeholder="O que o Claude deve saber sobre isso?"
-                  ></textarea>
+                  <label class="form-label small">Contexto Estratégico (Oculto - Apenas para a IA)</label>
+                  <textarea id="novaExplicacao" class="form-control border-primary" rows="2" placeholder="O que o Claude deve saber sobre isso?"></textarea>
                 </div>
                 <div class="col-md-3">
-                  <button
-                    type="button"
-                    id="btnInserirOpcao"
-                    onclick="adicionarNovoItem()"
-                    class="btn btn-primary w-100 fw-bold h-100 text-nowrap"
-                  >
-                    Inserir
-                  </button>
+                  <button type="button" id="btnInserirOpcao" onclick="adicionarNovoItem()" class="btn btn-primary w-100 fw-bold h-100 text-nowrap">Inserir</button>
                 </div>
               </div>
             </div>
 
-            <h6 class="fw-bold mb-4 text-dark border-bottom pb-2">
-              Banco de Dados Ativo
-            </h6>
+            <h6 class="fw-bold mb-4 text-dark border-bottom pb-2">Banco de Dados Ativo</h6>
 
             <div class="row g-4">
               <div class="col-12">
-                <label class="form-label text-muted m-0"
-                  >Temas Adicionais</label
-                >
+                <label class="form-label text-muted m-0">Temas Adicionais</label>
                 <div id="listaTemas"></div>
               </div>
               <div class="col-12">
-                <label class="form-label text-muted m-0"
-                  >Ganchos Adicionais</label
-                >
+                <label class="form-label text-muted m-0">Ganchos Adicionais</label>
                 <div id="listaGanchos"></div>
               </div>
               <div class="col-lg-4 col-md-6">
@@ -1451,109 +370,55 @@
           </div>
 
           <div id="painelLixeira" class="card p-5 d-none">
-            <div
-              class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3"
-            >
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
               <h4 class="m-0 text-danger fw-bold">Lixeira do Sistema</h4>
-              <button
-                onclick="abrirConfiguracoes()"
-                class="btn btn-light border text-dark fw-bold px-4 bg-transparent"
-              >
-                Voltar
-              </button>
+              <button onclick="abrirConfiguracoes()" class="btn btn-light border text-dark fw-bold px-4 bg-transparent">Voltar</button>
             </div>
             <p class="text-muted mb-4">
-              Itens excluídos permanecem aqui por 10 dias antes da limpeza
-              automática do servidor.
+              Itens excluídos permanecem aqui por 10 dias antes da limpeza automática do servidor.
             </p>
             <div id="listaLixeira" class="list-group"></div>
           </div>
 
           <div id="loading" class="text-center d-none my-5 py-5">
-            <div
-              class="spinner-border text-primary mb-3"
-              style="width: 3rem; height: 3rem"
-            ></div>
+            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem"></div>
             <h5 class="fw-bold text-dark">Processando Estratégia...</h5>
-            <p class="text-muted small">
-              O Claude está a cruzar as informações com o manual da marca.
-            </p>
+            <p class="text-muted small">O Claude está a cruzar as informações com o manual da marca.</p>
           </div>
 
-          <div
-            id="resultadoContainer"
-            class="card p-4 p-md-5 d-none shadow-sm mb-4"
-          >
-            <div
-              class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 border-bottom pb-3 gap-3"
-            >
-              <h4 class="m-0 text-primary fw-bold" id="resultadoTitulo">
-                Briefing Finalizado
-              </h4>
+          <div id="resultadoContainer" class="card p-4 p-md-5 d-none shadow-sm mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 border-bottom pb-3 gap-3">
+              <h4 class="m-0 text-primary fw-bold" id="resultadoTitulo">Briefing Finalizado</h4>
               <div class="d-flex gap-2">
-                <button
-                  onclick="copiarTexto()"
-                  class="btn btn-light border text-dark fw-bold bg-transparent"
-                >
-                  Copiar Texto
-                </button>
-                <button onclick="exportarPDF()" class="btn btn-primary fw-bold">
-                  📥 Exportar PDF
-                </button>
+                <button onclick="copiarTexto()" class="btn btn-light border text-dark fw-bold bg-transparent">Copiar Texto</button>
+                <button onclick="exportarPDF()" class="btn btn-primary fw-bold">📥 Exportar PDF</button>
               </div>
             </div>
-            <div
-              id="resultado"
-              class="p-4 bg-light rounded text-dark markdown-body border"
-            ></div>
+            <div id="resultado" class="p-4 bg-light rounded text-dark markdown-body border"></div>
             <div class="text-center mt-5">
-              <button
-                onclick="novaSessao()"
-                class="btn btn-light border text-dark fw-bold px-5 py-3 rounded-pill bg-transparent"
-              >
-                Novo Roteiro
-              </button>
+              <button onclick="novaSessao()" class="btn btn-light border text-dark fw-bold px-5 py-3 rounded-pill bg-transparent">Novo Roteiro</button>
             </div>
           </div>
 
           <div id="painelEstruturador" class="card p-5 d-none mb-4 shadow-sm">
-            <div
-              class="d-flex justify-content-between align-items-center mb-4  pb-3 flex-wrap gap-2"
-            >
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 flex-wrap gap-2">
               <div>
-                <h4 class="m-0 text-dark fw-bold">
-                  Estruturador Técnico de Roteiro
-                </h4>
-                <p class="text-muted small m-0">
-                  Preencha e quebre o roteiro por cenas antes de exportar o
-                  documento oficial.
-                </p>
+                <h4 class="m-0 text-dark fw-bold">Roteiro de Vídeo</h4>
+                <p class="text-muted small m-0">Briefing completo para edição de conteúdo — preencha todos os campos antes de exportar.</p>
               </div>
-              <button
-                onclick="exportarPDFEstruturado()"
-                class="btn btn-primary d-flex align-items-center gap-2"
-              >
-                📥 Exportar PDF Estruturado
+              <button onclick="exportarPDFEstruturado()" class="btn btn-primary d-flex align-items-center gap-2">
+                📥 Exportar Roteiro de Vídeo em PDF
               </button>
             </div>
 
             <div class="row g-4 mb-5">
               <div class="col-12">
-                <h5
-                  class="text-primary fw-bold mb-0 small tracking-wider pb-2"
-                >
-                  1. INFORMAÇÕES DO PROJETO
-                </h5>
+                <h5 class="text-primary fw-bold mb-0 small tracking-wider pb-2 border-bottom">1. INFORMAÇÕES DO PROJETO</h5>
               </div>
 
               <div class="col-md-8">
                 <label class="form-label">Tema do Vídeo</label>
-                <input
-                  type="text"
-                  id="est_tema"
-                  class="form-control"
-                  placeholder="Ex: Ração Seca vs Intestino Sênior"
-                />
+                <input type="text" id="est_tema" class="form-control" placeholder="Ex: Ração Seca vs Intestino Sênior" />
               </div>
               <div class="col-md-4">
                 <label class="form-label">Objetivo do Vídeo</label>
@@ -1570,175 +435,82 @@
 
               <div class="col-md-4">
                 <label class="form-label">Estilo</label>
-                <input
-                  type="text"
-                  id="est_estilo"
-                  class="form-control"
-                  placeholder="Ex: Clean, Dinâmico"
-                />
+                <input type="text" id="est_estilo" class="form-control" placeholder="Ex: Clean, Dinâmico" />
               </div>
               <div class="col-md-4">
                 <label class="form-label">Formato</label>
-                <input
-                  type="text"
-                  id="est_formato"
-                  class="form-control"
-                  placeholder="Ex: 9:16 (Reels)"
-                />
+                <input type="text" id="est_formato" class="form-control" placeholder="Ex: 9:16 (Reels)" />
               </div>
               <div class="col-md-4">
                 <label class="form-label">Veiculação</label>
-                <input
-                  type="text"
-                  id="est_veiculacao"
-                  class="form-control"
-                  placeholder="Ex: Instagram / TikTok"
-                />
+                <input type="text" id="est_veiculacao" class="form-control" placeholder="Ex: Instagram / TikTok" />
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">Narrador</label>
-                <input
-                  type="text"
-                  id="est_narrador"
-                  class="form-control"
-                  placeholder="Ex: Veterinária"
-                />
+                <input type="text" id="est_narrador" class="form-control" placeholder="Ex: Veterinária" />
               </div>
               <div class="col-md-4">
                 <label class="form-label">Tempo Estimado</label>
-                <input
-                  type="text"
-                  id="est_tempo"
-                  class="form-control"
-                  placeholder="Ex: 60s"
-                />
+                <input type="text" id="est_tempo" class="form-control" placeholder="Ex: 60s" />
               </div>
               <div class="col-md-4">
                 <label class="form-label">Prazo de Entrega</label>
-                <input
-                  type="date"
-                  id="est_prazo"
-                  class="form-control"
-                  onchange="calcularBadgePrazo()"
-                />
+                <input type="date" id="est_prazo" class="form-control" onchange="calcularBadgePrazo()" />
                 <div id="est_badge_prazo" class="mt-2"></div>
               </div>
 
               <div class="col-12">
-                <label class="form-label d-block mb-2"
-                  >Países de Veiculação</label
-                >
+                <label class="form-label d-block mb-2">Países de Veiculação</label>
                 <div class="p-3 border rounded bg-light d-flex gap-4">
                   <div class="form-check">
-                    <input
-                      type="checkbox"
-                      id="est_br"
-                      class="form-check-input border-secondary"
-                    />
-                    <label class="form-check-label fw-bold text-dark"
-                      >Brasil</label
-                    >
+                    <input type="checkbox" id="est_br" class="form-check-input border-secondary" />
+                    <label class="form-check-label fw-bold text-dark">Brasil</label>
                   </div>
                   <div class="form-check">
-                    <input
-                      type="checkbox"
-                      id="est_eua"
-                      class="form-check-input border-secondary"
-                    />
-                    <label class="form-check-label fw-bold text-dark"
-                      >EUA</label
-                    >
+                    <input type="checkbox" id="est_eua" class="form-check-input border-secondary" />
+                    <label class="form-check-label fw-bold text-dark">EUA</label>
                   </div>
                 </div>
               </div>
 
               <div class="col-md-4">
-                <label class="form-label">Referência 1</label
-                ><input
-                  type="text"
-                  id="est_ref1"
-                  class="form-control"
-                  placeholder="Link ou observação..."
-                />
+                <label class="form-label">Referência 1</label>
+                <input type="text" id="est_ref1" class="form-control" placeholder="Link ou observação..." />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Referência 2</label
-                ><input
-                  type="text"
-                  id="est_ref2"
-                  class="form-control"
-                  placeholder="Link ou observação..."
-                />
+                <label class="form-label">Referência 2</label>
+                <input type="text" id="est_ref2" class="form-control" placeholder="Link ou observação..." />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Referência 3</label
-                ><input
-                  type="text"
-                  id="est_ref3"
-                  class="form-control"
-                  placeholder="Link ou observação..."
-                />
+                <label class="form-label">Referência 3</label>
+                <input type="text" id="est_ref3" class="form-control" placeholder="Link ou observação..." />
               </div>
             </div>
 
             <div class="mb-5 border-bottom pb-4">
-              <div
-                class="d-flex justify-content-between align-items-center mb-3"
-              >
-                <h5 class="text-primary fw-bold m-0 small tracking-wider">
-                  2. DIVISÃO DE CENAS TÉCNICAS
-                </h5>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="text-primary fw-bold m-0 small tracking-wider">2. DIVISÃO DE CENAS TÉCNICAS</h5>
                 <div class="btn-group btn-group-sm">
-                  <button
-                    type="button"
-                    onclick="adicionarCenaPainel()"
-                    class="btn btn-outline-primary border py-1"
-                  >
-                    + Adicionar Cena
-                  </button>
-                  <button
-                    type="button"
-                    onclick="removerUltimaCenaPainel()"
-                    class="btn btn-outline-danger border py-1"
-                  >
-                    - Remover Última
-                  </button>
+                  <button type="button" onclick="adicionarCenaPainel()" class="btn btn-outline-primary border py-1">+ Adicionar Cena</button>
+                  <button type="button" onclick="removerUltimaCenaPainel()" class="btn btn-outline-danger border py-1">- Remover Última</button>
                 </div>
               </div>
               <div id="containerCenasEstruturadas"></div>
             </div>
 
             <div class="mb-2 pb-4">
-              <h5 class="text-primary fw-bold mb-3 small tracking-wider">
-                OBSERVAÇÕES GERAIS DO BRIEFING
-              </h5>
-              <textarea
-                id="est_observacao"
-                class="form-control"
-                rows="3"
-                placeholder="Restrições de marca, regras de compliance..."
-              ></textarea>
+              <h5 class="text-primary fw-bold mb-3 small tracking-wider">OBSERVAÇÕES GERAIS DO BRIEFING</h5>
+              <textarea id="est_observacao" class="form-control" rows="3" placeholder="Restrições de marca, regras de compliance..."></textarea>
             </div>
 
             <div class="row g-4">
               <div class="col-12">
-                <h5
-                  class="text-primary fw-bold mb-0 small tracking-wider  pb-2"
-                >
-                  3. CAPA / THUMBNAIL E METRICS
-                </h5>
+                <h5 class="text-primary fw-bold mb-0 small tracking-wider pb-2 border-bottom">3. CAPA / THUMBNAIL E METRICS</h5>
               </div>
               <div class="col-md-8">
-                <label class="form-label"
-                  >Texto de Apoio da Thumbnail (Gatilho da Capa)</label
-                >
-                <input
-                  type="text"
-                  id="est_thumb_text"
-                  class="form-control"
-                  placeholder="Ex: O segredo oculto da ração..."
-                />
+                <label class="form-label">Texto de Apoio da Thumbnail (Gatilho da Capa)</label>
+                <input type="text" id="est_thumb_text" class="form-control" placeholder="Ex: O segredo oculto da ração..." />
               </div>
               <div class="col-md-4">
                 <label class="form-label">Direcionamento Visual da Capa</label>
@@ -1755,1050 +527,6 @@
       </div>
     </div>
 
-    <script>
-        // Adicione junto às outras variáveis globais no topo do <script>
-        const logoBrancaPdf = new Image();
-        logoBrancaPdf.src = "coco-and-luna-logo-branco.png";
-
-
-      let anexosData = [];
-      let configGlobal = {
-        mercados: [],
-        narradores: [],
-        formatos: [],
-        temas: [],
-        ganchos: [],
-      };
-      let expandedCategories = {
-        mercados: false,
-        narradores: false,
-        formatos: false,
-        temas: false,
-        ganchos: false,
-      };
-      let todosRoteirosCache = [];
-      let edicaoAtual = null;
-
-      let cenasLocais = [];
-
-      const sidebar = document.getElementById("sidebar");
-      const resizer = document.getElementById("sidebarResizer");
-      let isResizing = false;
-      let lastSidebarWidth = 340;
-
-      resizer.addEventListener("mousedown", (e) => {
-        isResizing = true;
-        document.body.style.cursor = "col-resize";
-        document.body.style.userSelect = "none";
-        resizer.classList.add("active");
-      });
-
-      document.addEventListener("mousemove", (e) => {
-        if (!isResizing) return;
-        if (sidebar.classList.contains("collapsed")) return;
-        let newWidth = e.clientX;
-        if (newWidth < 220) newWidth = 220;
-        if (newWidth > 600) newWidth = 600;
-        sidebar.style.width = newWidth + "px";
-        lastSidebarWidth = newWidth;
-      });
-
-      document.addEventListener("mouseup", () => {
-        if (isResizing) {
-          isResizing = false;
-          document.body.style.cursor = "default";
-          document.body.style.userSelect = "auto";
-          resizer.classList.remove("active");
-        }
-      });
-
-      document.addEventListener("DOMContentLoaded", () => {
-        carregarConfiguracoes();
-        carregarHistorico();
-        inicializarCenasPadrao();
-
-        document
-          .getElementById("anexoInput")
-          .addEventListener("change", async function (e) {
-            const files = Array.from(e.target.files);
-            if (files.length === 0) return;
-
-            let warningShown = false;
-            for (let file of files) {
-              if (file.size > 10 * 1024 * 1024 && !warningShown) {
-                Swal.fire(
-                  "Aviso",
-                  "Um ou mais ficheiros excedem 10MB. Isto pode causar lentidão na resposta.",
-                  "warning",
-                );
-                warningShown = true;
-              }
-              const base64 = await lerArquivoBase64(file);
-              anexosData.push({
-                nome: file.name,
-                tipo: file.type,
-                base64: base64,
-              });
-            }
-            renderAnexosPreview();
-            this.value = "";
-          });
-      });
-
-      function toggleDarkModeGlobal() {
-        document.body.classList.toggle("dark-mode");
-        const isDark = document.body.classList.contains("dark-mode");
-        document.getElementById("txtModo").innerText = isDark
-          ? "Modo Claro"
-          : "Modo Escuro";
-      }
-
-      function toggleLargura() {
-        const container = document.getElementById("mainContainer");
-        container.classList.toggle("expanded");
-        const isExpanded = container.classList.contains("expanded");
-        document.getElementById("txtLargura").innerText = isExpanded
-          ? "Contrair tela"
-          : "Expandir tela";
-      }
-
-      function lerArquivoBase64(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (event) => resolve(event.target.result);
-          reader.onerror = (error) => reject(error);
-          reader.readAsDataURL(file);
-        });
-      }
-
-      function renderAnexosPreview() {
-        const preview = document.getElementById("anexoPreview");
-        preview.innerHTML = "";
-        if (anexosData.length === 0) {
-          preview.classList.add("d-none");
-          return;
-        }
-        preview.classList.remove("d-none");
-
-        anexosData.forEach((anexo, index) => {
-          const div = document.createElement("div");
-          div.className =
-            "p-3 bg-white border rounded d-flex justify-content-between align-items-center shadow-sm";
-          div.innerHTML = `
-                    <div class="text-truncate" style="max-width: 80%;">
-                        <strong class="text-brand-blue">📄 Anexo:</strong> 
-                        <span class="text-dark">${anexo.nome}</span>
-                    </div> 
-                    <button type="button" class="btn btn-sm btn-panel py-1 px-3 text-danger bg-transparent" onclick="removerAnexo(${index})">Remover</button>
-                `;
-          preview.appendChild(div);
-        });
-      }
-
-      function removerAnexo(index) {
-        anexosData.splice(index, 1);
-        renderAnexosPreview();
-      }
-
-      function toggleMenuMobile() {
-        document.getElementById("sidebar").classList.toggle("active");
-        document.getElementById("overlay").classList.toggle("active");
-      }
-
-      function toggleSidebarCollapse() {
-        sidebar.classList.toggle("collapsed");
-        if (sidebar.classList.contains("collapsed")) {
-          sidebar.style.width = "80px";
-        } else {
-          sidebar.style.width = lastSidebarWidth + "px";
-        }
-      }
-
-      async function carregarConfiguracoes() {
-        try {
-          const res = await fetch("/api/configuracoes");
-          configGlobal = await res.json();
-          preencherSelectMisturado("mercado", configGlobal.mercados);
-          preencherSelectMisturado("narrador", configGlobal.narradores);
-          preencherSelectMisturado("formato", configGlobal.formatos);
-          preencherSelectMisturado("tema", configGlobal.temas);
-          preencherSelectMisturado("gancho", configGlobal.ganchos);
-          renderizarListasDeEdicao();
-        } catch (err) {}
-      }
-
-      function renderizarListasDeEdicao() {
-        ["mercados", "narradores", "formatos", "temas", "ganchos"].forEach(
-          (cat) => atualizarDOMLista(cat),
-        );
-      }
-
-      function atualizarDOMLista(categoria) {
-        const array = configGlobal[categoria] || [];
-        const container = document.getElementById(
-          `lista${categoria.charAt(0).toUpperCase() + categoria.slice(1)}`,
-        );
-        const isExpanded = expandedCategories[categoria];
-        const limit = 3;
-        let html = "";
-
-        if (array.length === 0) {
-          container.innerHTML =
-            '<div class="p-3 mt-2 text-muted small text-center bg-light border rounded">Nenhum registo encontrado.</div>';
-          return;
-        }
-
-        if (isExpanded) {
-          html += `<div class="mb-2 mt-2"><input type="text" class="form-control form-control-sm" placeholder="Buscar em ${categoria}..." onkeyup="filtrarListaDOM(this, 'items-${categoria}')"></div>`;
-        }
-
-        html += `<div class="${isExpanded ? "rounded border p-1 bg-light mt-2" : "mt-2"}" style="${isExpanded ? "max-height: 250px; overflow-y: auto;" : ""}">`;
-
-        array.forEach((item, index) => {
-          const partes = item.split(" — ");
-          const titulo = partes[0];
-          const explicacao = partes[1]
-            ? `<span class="d-block text-muted mt-1" style="font-size: 0.8rem;">${partes[1]}</span>`
-            : "";
-          const hideClass = !isExpanded && index >= limit ? "d-none" : "";
-
-          html += `
-                    <div class="p-3 bg-white mb-2 rounded border items-${categoria} ${hideClass}" data-search="${item.toLowerCase()}">
-                        <div class="text-truncate w-100 mb-2">
-                            <strong class="text-brand-blue" style="font-size: 0.95rem;">${titulo}</strong>
-                            ${explicacao}
-                        </div>
-                        <div class="d-flex gap-2 justify-content-end">
-                            <button class="btn btn-sm btn-panel py-1 px-3 bg-transparent" onclick="prepararEdicao('${categoria}', ${index})" title="Editar">Editar</button>
-                            <button class="btn btn-sm btn-danger py-1 px-3 fw-bold text-nowrap" onclick="removerItemPersonalizado('${categoria}', ${index})" title="Excluir">Excluir</button>
-                        </div>
-                    </div>
-                `;
-        });
-        html += `</div>`;
-
-        if (array.length > limit) {
-          if (!isExpanded) {
-            html += `<button class="btn btn-sm btn-panel w-100 mt-2 bg-transparent" onclick="toggleExpandir('${categoria}', true)">Exibir todos (${array.length})</button>`;
-          } else {
-            html += `<button class="btn btn-sm btn-panel w-100 mt-2 bg-transparent" onclick="toggleExpandir('${categoria}', false)">Ocultar lista</button>`;
-          }
-        }
-        container.innerHTML = html;
-      }
-
-      function prepararEdicao(categoria, index) {
-        const item = configGlobal[categoria][index];
-        const partes = item.split(" — ");
-
-        document.getElementById("novoTipo").value = categoria;
-        document.getElementById("novoTitulo").value = partes[0];
-        document.getElementById("novaExplicacao").value = partes[1] || "";
-
-        edicaoAtual = { categoria, index };
-
-        document.getElementById("tituloFormOpcao").innerHTML =
-          "Editar Variável";
-        const btnInserir = document.getElementById("btnInserirOpcao");
-        btnInserir.textContent = "Atualizar";
-        document
-          .getElementById("areaFormNovaOpcao")
-          .scrollIntoView({ behavior: "smooth" });
-      }
-
-      function toggleExpandir(categoria, state) {
-        expandedCategories[categoria] = state;
-        atualizarDOMLista(categoria);
-      }
-
-      function filtrarListaDOM(input, itemClass) {
-        const termo = input.value.toLowerCase();
-        const items = document.querySelectorAll(`.${itemClass}`);
-        items.forEach((el) => {
-          if (el.getAttribute("data-search").includes(termo)) {
-            el.classList.remove("d-none");
-            el.classList.add("d-block");
-          } else {
-            el.classList.remove("d-block");
-            el.classList.add("d-none");
-          }
-        });
-      }
-
-      function preencherSelectMisturado(id, array) {
-        const select = document.getElementById(id);
-        if (!select) return;
-        let optgroup = select.querySelector("optgroup.novas-opcoes");
-
-        if (!optgroup) {
-          optgroup = document.createElement("optgroup");
-          optgroup.label = "Banco de Dados";
-          optgroup.className = "novas-opcoes text-brand-blue";
-          select.appendChild(optgroup);
-        }
-        optgroup.innerHTML = "";
-        array.forEach((item) => {
-          const opt = document.createElement("option");
-          opt.value = item;
-          opt.textContent = item.split(" — ")[0];
-          optgroup.appendChild(opt);
-        });
-      }
-
-      function adicionarNovoItem() {
-        const categoria = document.getElementById("novoTipo").value;
-        const titulo = document.getElementById("novoTitulo").value.trim();
-        const explicacao = document
-          .getElementById("novaExplicacao")
-          .value.trim();
-
-        if (!titulo) {
-          Swal.fire("Atenção", "O Título é obrigatório.", "warning");
-          return;
-        }
-
-        const itemFinal = explicacao ? `${titulo} — ${explicacao}` : titulo;
-
-        if (edicaoAtual) {
-          if (edicaoAtual.categoria !== categoria) {
-            configGlobal[edicaoAtual.categoria].splice(edicaoAtual.index, 1);
-            configGlobal[categoria].push(itemFinal);
-          } else {
-            configGlobal[categoria][edicaoAtual.index] = itemFinal;
-          }
-
-          edicaoAtual = null;
-          document.getElementById("tituloFormOpcao").innerHTML =
-            "Adicionar Nova Variável";
-          document.getElementById("btnInserirOpcao").textContent = "Inserir";
-          salvarConfiguracoes(true, "Registo Atualizado");
-        } else {
-          configGlobal[categoria].push(itemFinal);
-          salvarConfiguracoes(true, "Registo Adicionado");
-        }
-
-        document.getElementById("novoTitulo").value = "";
-        document.getElementById("novaExplicacao").value = "";
-      }
-
-      async function removerItemPersonalizado(categoria, index) {
-        const valor = configGlobal[categoria][index];
-        await fetch("/api/lixeira", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ categoria, valor }),
-        });
-
-        configGlobal[categoria].splice(index, 1);
-        await salvarConfiguracoes(false);
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "info",
-          title: "Enviado para a lixeira",
-          showConfirmButton: false,
-          timer: 2000,
-        });
-      }
-
-      async function salvarConfiguracoes(
-        mostrarAviso = false,
-        mensagem = "Concluído",
-      ) {
-        try {
-          await fetch("/api/configuracoes", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(configGlobal),
-          });
-          await carregarConfiguracoes();
-          if (mostrarAviso)
-            Swal.fire({
-              toast: true,
-              position: "top-end",
-              icon: "success",
-              title: mensagem,
-              showConfirmButton: false,
-              timer: 2000,
-            });
-        } catch (err) {}
-      }
-
-      function abrirConfiguracoes() {
-        document.getElementById("painelCriacao").classList.add("d-none");
-        document.getElementById("painelLixeira").classList.add("d-none");
-        document.getElementById("resultadoContainer").classList.add("d-none");
-        document.getElementById("painelRevisao").classList.add("d-none");
-        document.getElementById("painelEstruturador").classList.add("d-none");
-        document
-          .getElementById("painelConfiguracoes")
-          .classList.remove("d-none");
-        if (window.innerWidth <= 768) toggleMenuMobile();
-      }
-
-      async function abrirLixeira() {
-        document.getElementById("painelConfiguracoes").classList.add("d-none");
-        document.getElementById("painelLixeira").classList.remove("d-none");
-        await carregarLixeira();
-      }
-
-      async function carregarLixeira() {
-        const res = await fetch("/api/lixeira");
-        const itens = await res.json();
-        const container = document.getElementById("listaLixeira");
-        container.innerHTML = "";
-
-        if (itens.length === 0) {
-          container.innerHTML =
-            '<div class="p-5 text-center text-muted border rounded bg-light">A sua lixeira está vazia.</div>';
-          return;
-        }
-
-        itens.forEach((item) => {
-          const diffTempos = new Date() - new Date(item.dataExclusao);
-          const diasPassados = Math.floor(diffTempos / (1000 * 60 * 60 * 24));
-          const diasRestantes = 10 - diasPassados;
-
-          container.innerHTML += `
-                    <div class="list-group-item d-flex justify-content-between align-items-center bg-white mb-3 border rounded p-4">
-                        <div>
-                            <span class="badge bg-dark mb-2 px-2 py-1">${item.categoria.toUpperCase()}</span>
-                            <strong class="d-block text-dark fs-6">${item.valor.split(" — ")[0]}</strong>
-                            <span class="text-danger fw-bold d-block mt-1" style="font-size: 0.8rem;">Autolimpeza em ${diasRestantes} dias</span>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-panel px-3 py-2 bg-transparent" onclick="restaurarItemLixeira('${item._id}')">Restaurar</button>
-                            <button class="btn btn-sm btn-danger fw-bold px-3 py-2" onclick="excluirPermanente('${item._id}')">Apagar</button>
-                        </div>
-                    </div>
-                `;
-        });
-      }
-
-      async function restaurarItemLixeira(id) {
-        await fetch(`/api/lixeira/restaurar/${id}`, { method: "POST" });
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "success",
-          title: "Restaurado com sucesso",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-        await carregarConfiguracoes();
-        await carregarLixeira();
-      }
-
-      async function excluirPermanente(id) {
-        await fetch(`/api/lixeira/${id}`, { method: "DELETE" });
-        await carregarLixeira();
-      }
-
-      function gerarAleatorio() {
-        const selects = ["narrador", "formato", "tema", "gancho"];
-        selects.forEach((id) => {
-          const el = document.getElementById(id);
-          const options = Array.from(el.options).filter(
-            (o) => !o.disabled && o.value !== "",
-          );
-          if (options.length > 0)
-            el.value =
-              options[Math.floor(Math.random() * options.length)].value;
-        });
-        if (
-          !document.getElementById("painelRevisao").classList.contains("d-none")
-        )
-          revisarPedido();
-      }
-
-      function getSelectedText(id) {
-        const sel = document.getElementById(id);
-        if (!sel || sel.selectedIndex === -1) return "";
-        return sel.options[sel.selectedIndex].text;
-      }
-
-      function revisarPedido() {
-        let anexosHtml = "";
-        if (anexosData.length > 0) {
-          anexosHtml =
-            '<div class="mt-4 pt-3 border-top"><strong class="text-brand-blue d-block mb-2">Ficheiros Anexados:</strong>';
-          anexosData.forEach((a) => {
-            anexosHtml += `<div class="text-dark small mb-1">• ${a.nome}</div>`;
-          });
-          anexosHtml += "</div>";
-        }
-
-        const resumo = `
-                <div class="mb-3"><strong class="text-muted text-uppercase small">Mercado</strong><br><span class="text-dark fw-bold">${getSelectedText("mercado")}</span></div>
-                <div class="mb-3"><strong class="text-muted text-uppercase small">Narrador</strong><br><span class="text-dark fw-bold">${getSelectedText("narrador")}</span></div>
-                <div class="mb-3"><strong class="text-muted text-uppercase small">Formato</strong><br><span class="text-dark fw-bold">${getSelectedText("formato")}</span></div>
-                <div class="mb-3"><strong class="text-muted text-uppercase small">Tema Principal</strong><br><span class="text-brand-blue fw-bold">${getSelectedText("tema")}</span></div>
-                <div class="mb-3"><strong class="text-muted text-uppercase small">Gancho</strong><br><span class="text-dark fw-bold">${getSelectedText("gancho")}</span></div>
-                ${anexosHtml}
-            `;
-        document.getElementById("resumoCombinacao").innerHTML = resumo;
-        document.getElementById("painelCriacao").classList.add("d-none");
-        document.getElementById("painelRevisao").classList.remove("d-none");
-      }
-
-      function voltarEdicao() {
-        document.getElementById("painelRevisao").classList.add("d-none");
-        document.getElementById("painelCriacao").classList.remove("d-none");
-      }
-
-      async function confirmarEnvio() {
-        const dados = {
-          mercado: document.getElementById("mercado").value,
-          narrador: document.getElementById("narrador").value,
-          formato: document.getElementById("formato").value,
-          tema: document.getElementById("tema").value,
-          gancho: document.getElementById("gancho").value,
-          notas: document.getElementById("notas").value,
-          anexos: anexosData,
-        };
-
-        document.getElementById("painelRevisao").classList.add("d-none");
-        document.getElementById("loading").classList.remove("d-none");
-
-        try {
-          const response = await fetch("/api/gerar", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(dados),
-          });
-          const data = await response.json();
-
-          document.getElementById("resultado").innerHTML = marked.parse(
-            data.roteiro,
-          );
-          document
-            .getElementById("resultadoContainer")
-            .classList.remove("d-none");
-
-          document.getElementById("filtroDataHistorico").value = "";
-          carregarHistorico();
-        } catch (error) {
-          Swal.fire(
-            "Erro",
-            "Ocorreu um erro de comunicação com o servidor.",
-            "error",
-          );
-          novaSessao();
-        } finally {
-          document.getElementById("loading").classList.add("d-none");
-        }
-      }
-
-      async function carregarHistorico() {
-        try {
-          const response = await fetch("/api/historico");
-          todosRoteirosCache = await response.json();
-          renderizarHistorico(todosRoteirosCache);
-        } catch (e) {}
-      }
-
-      function renderizarHistorico(roteirosBrutos) {
-        const dataFiltro = document.getElementById("filtroDataHistorico").value;
-        let roteirosFiltrados = roteirosBrutos;
-
-        if (dataFiltro) {
-          roteirosFiltrados = roteirosBrutos.filter((rot) => {
-            const dataRot = new Date(rot.dataCriacao);
-            const dataRotString = new Date(
-              dataRot.getTime() - dataRot.getTimezoneOffset() * 60000,
-            )
-              .toISOString()
-              .split("T")[0];
-            return dataRotString === dataFiltro;
-          });
-        }
-
-        const lista = document.getElementById("listaHistorico");
-        lista.innerHTML = "";
-
-        if (roteirosFiltrados.length === 0) {
-          lista.innerHTML =
-            '<div class="p-4 text-center text-muted small">Nenhum registo encontrado.</div>';
-          return;
-        }
-
-        roteirosFiltrados.forEach((rot) => {
-          const div = document.createElement("div");
-          div.className = "historico-item bg-white border shadow-sm";
-          div.onclick = () => {
-            exibirRoteiroSalvo(rot);
-            if (window.innerWidth <= 768) toggleMenuMobile();
-          };
-          const tituloCurto = rot.tema.split(" — ")[0];
-          div.innerHTML = `
-                    <div class="historico-titulo text-truncate" title="${tituloCurto}">${tituloCurto}</div>
-                    <div class="historico-data hide-on-collapse">${new Date(rot.dataCriacao).toLocaleString("pt-BR")} • ${rot.mercado.split(" — ")[0]}</div>
-                `;
-          lista.appendChild(div);
-        });
-      }
-
-      function exibirRoteiroSalvo(rot) {
-        document.getElementById("painelCriacao").classList.add("d-none");
-        document.getElementById("painelRevisao").classList.add("d-none");
-        document.getElementById("painelConfiguracoes").classList.add("d-none");
-        document.getElementById("painelLixeira").classList.add("d-none");
-        document.getElementById("painelEstruturador").classList.add("d-none");
-        document
-          .getElementById("resultadoContainer")
-          .classList.remove("d-none");
-
-        document.getElementById("resultado").innerHTML = marked.parse(
-          rot.conteudo,
-        );
-        document.getElementById("resultadoTitulo").innerText =
-          "Roteiro Guardado";
-      }
-
-      function novaSessao() {
-        document.getElementById("resultadoContainer").classList.add("d-none");
-        document.getElementById("painelRevisao").classList.add("d-none");
-        document.getElementById("painelConfiguracoes").classList.add("d-none");
-        document.getElementById("painelLixeira").classList.add("d-none");
-        document.getElementById("painelEstruturador").classList.add("d-none");
-        document.getElementById("painelCriacao").classList.remove("d-none");
-        document.getElementById("formRoteiro").reset();
-
-        anexosData = [];
-        renderAnexosPreview();
-        inicializarCenasPadrao();
-
-        edicaoAtual = null;
-        document.getElementById("resultadoTitulo").innerText =
-          "Briefing Finalizado";
-        if (
-          window.innerWidth <= 768 &&
-          document.getElementById("sidebar").classList.contains("active")
-        )
-          toggleMenuMobile();
-      }
-
-      function copiarTexto() {
-        navigator.clipboard
-          .writeText(document.getElementById("resultado").innerText)
-          .then(() => {
-            Swal.fire({
-              toast: true,
-              position: "top-end",
-              icon: "success",
-              title: "Copiado para a área de transferência",
-              showConfirmButton: false,
-              timer: 1500,
-            });
-          });
-      }
-
-      // ==========================================
-      // EXPORTAÇÃO PDF ORIGINAL DA IA
-      // ==========================================
-      function exportarPDF() {
-        const opt = {
-          margin: [15, 15, 15, 15],
-          filename: "Roteiro_CocoAndLuna_IA.pdf",
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-        };
-        html2pdf().set(opt).from(document.getElementById("resultado")).save();
-      }
-
-      // ==========================================
-      // ESTRUTURADOR DE CENAS TÉCNICAS E PDF jsPDF
-      // ==========================================
-      function abrirEstruturadorCompleto() {
-        document.getElementById("painelCriacao").classList.add("d-none");
-        document.getElementById("painelRevisao").classList.add("d-none");
-        document.getElementById("resultadoContainer").classList.add("d-none");
-        document.getElementById("painelConfiguracoes").classList.add("d-none");
-        document.getElementById("painelLixeira").classList.add("d-none");
-        document.getElementById("painelEstruturador").classList.remove("d-none");
-        if (window.innerWidth <= 768) toggleMenuMobile();
-      }
-
-      function inicializarCenasPadrao() {
-        cenasLocais = [];
-        for (let i = 0; i < 6; i++) {
-          cenasLocais.push({
-            id: Date.now() + i,
-            narracao: "",
-            lettering: "",
-            destaques: "",
-            descricao: "",
-            audio: "",
-          });
-        }
-        renderizarCenasNoDOM();
-      }
-
-      function renderizarCenasNoDOM() {
-        const container = document.getElementById("containerCenasEstruturadas");
-        container.innerHTML = "";
-
-        cenasLocais.forEach((cena, idx) => {
-          const htmlBlock = `
-                    <div class="sc-box shadow-sm mb-3" id="cena_bloco_${cena.id}">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                                <span class="sc-number">${idx + 1}</span>
-                                <strong class="text-uppercase tracking-wider small text-muted">Cena Técnica</strong>
-                            </div>
-                            <button type="button" class="btn btn-sm text-danger border-0 p-1 fw-bold bg-transparent" onclick="excluirCenaEspecifica(${cena.id})">✕ Remover</button>
-                        </div>
-                        <div class="row g-2">
-                            <div class="col-md-4">
-                                <label class="form-label small text-muted mb-1">Narração / Áudio de Voz</label>
-                                <textarea class="form-control form-control-sm" rows="3" onchange="atualizarCampoCena(${cena.id}, 'narracao', this.value)" placeholder="O que é dito ou dublado...">${cena.narracao}</textarea>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label small text-muted mb-1">Lettering/label>
-                                <textarea class="form-control form-control-sm" rows="3" onchange="atualizarCampoCena(${cena.id}, 'lettering', this.value)" placeholder="Texto escrito...">${cena.lettering}</textarea>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label small text-muted mb-1">Palavras Destaque</label>
-                                <textarea class="form-control form-control-sm" rows="3" onchange="atualizarCampoCena(${cena.id}, 'destaques', this.value)" placeholder="Grifos, emojis...">${cena.destaques}</textarea>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label small text-muted mb-1">Descrição Visual / Takes</label>
-                                <textarea class="form-control form-control-sm" rows="3" onchange="atualizarCampoCena(${cena.id}, 'descricao', this.value)" placeholder="Ação da cena...">${cena.descricao}</textarea>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label small text-muted mb-1">Trilha / Efeitos Sonoros</label>
-                                <textarea class="form-control form-control-sm" rows="3" onchange="atualizarCampoCena(${cena.id}, 'audio', this.value)" placeholder="SFX, música de fundo...">${cena.audio}</textarea>
-                            </div>
-                        </div>
-                    </div>
-                `;
-          container.insertAdjacentHTML("beforeend", htmlBlock);
-        });
-      }
-
-      function atualizarCampoCena(id, campo, valor) {
-        const index = cenasLocais.findIndex((c) => c.id === id);
-        if (index !== -1) cenasLocais[index][campo] = valor;
-      }
-
-      function adicionarCenaPainel() {
-        cenasLocais.push({
-          id: Date.now() + Math.random(),
-          narracao: "",
-          lettering: "",
-          destaques: "",
-          descricao: "",
-          audio: "",
-        });
-        renderizarCenasNoDOM();
-      }
-
-      function removerUltimaCenaPainel() {
-        if (cenasLocais.length <= 1) return;
-        cenasLocais.pop();
-        renderizarCenasNoDOM();
-      }
-
-      function excluirCenaEspecifica(id) {
-        if (cenasLocais.length <= 1) return;
-        cenasLocais = cenasLocais.filter((c) => c.id !== id);
-        renderizarCenasNoDOM();
-      }
-
-      function calcularBadgePrazo() {
-        const campoData = document.getElementById("est_prazo").value;
-        const containerBadge = document.getElementById("est_badge_prazo");
-        if (!campoData) {
-          containerBadge.innerHTML = "";
-          return;
-        }
-
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-        const dataPrazo = new Date(campoData + "T00:00:00");
-        const diffDias = Math.ceil((dataPrazo - hoje) / 86400000);
-
-        let label = "";
-        let color = "";
-        if (diffDias < 0) {
-          label = `VENCIDO (${Math.abs(diffDias)} dias)`;
-          color = "#EF4444";
-        } else if (diffDias === 0) {
-          label = "HOJE";
-          color = "#EF4444";
-        } else if (diffDias <= 7) {
-          label = `ESTA SEMANA (${diffDias} dias)`;
-          color = "#D97706";
-        } else {
-          label = `LONGO PRAZO (${diffDias} dias)`;
-          color = "#38BDF8";
-        }
-
-        containerBadge.innerHTML = `<span class="badge py-2 px-3 fw-bold" style="background-color: ${color}; color: #fff;">${label}</span>`;
-      }
-      
-      // FUNÇÃO PARA CONVERTER IMAGEM DO DOM EM BASE64
-      function getBase64FromImg(imgElement) {
-        const canvas = document.createElement("canvas");
-        canvas.width = imgElement.naturalWidth;
-        canvas.height = imgElement.naturalHeight;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(imgElement, 0, 0);
-        return canvas.toDataURL("image/png");
-      }
-
-      function exportarPDFEstruturado() {
-        try {
-          const { jsPDF } = window.jspdf;
-          const doc = new jsPDF({
-            unit: "mm",
-            format: "a4",
-            orientation: "portrait",
-          });
-
-          const pageW = doc.internal.pageSize.getWidth();
-          const pageH = doc.internal.pageSize.getHeight();
-          const margin = 15;
-          const contentW = pageW - margin * 2;
-          let y = margin;
-
-          const assegurarEspaco = (needed) => {
-            if (y + needed > pageH - margin) {
-              doc.addPage();
-              y = margin;
-            }
-          };
-
-          doc.setFillColor(43, 95, 237);
-          doc.rect(0, 0, pageW, 26, "F");
-          doc.setTextColor(255, 255, 255);
-
-          // Tratamento da Imagem da Logo no PDF via Canvas mantendo proporção
-            const logoImg = logoBrancaPdf; // Agora utiliza a logo branca carregada globalmente
-            let logoAdicionada = false;
-          if (logoImg && logoImg.complete && logoImg.naturalHeight !== 0) {
-            try {
-              const logoBase64 = getBase64FromImg(logoImg);
-              
-              // Calcula a proporção exata da sua imagem para não achatar
-              const proporcao = logoImg.naturalWidth / logoImg.naturalHeight;
-              const alturaLogo = 10; // Altura em mm
-              const larguraLogo = alturaLogo * proporcao; // Largura calculada automaticamente
-              
-              // Aqui inserimos a imagem com as dimensões dinâmicas
-              doc.addImage(logoBase64, "PNG", margin, 5, larguraLogo, alturaLogo);
-              logoAdicionada = true;
-            } catch (e) {
-              console.warn("Erro ao processar imagem para PDF", e);
-            }
-          }
-
-          if (!logoAdicionada) {
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(14);
-            doc.text("COCO AND LUNA", margin, 12);
-          }
-
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(9);
-          doc.text("Roteiro de Vídeo", margin, 20);
-
-          doc.setFontSize(8.5);
-          doc.text(
-            "Direção de Conteúdo e Produção Audiovisual",
-            pageW - margin - 65,
-            15,
-          );
-          y = 36;
-
-          doc.setTextColor(30, 41, 59);
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(16);
-          doc.text("Roteiro de Vídeo", margin, y);
-          y += 5;
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(9);
-          doc.setTextColor(100, 116, 139);
-          doc.text(
-            `Criado em: ${new Date().toLocaleDateString("pt-BR")}`,
-            margin,
-            y,
-          );
-          y += 10;
-
-          const imprimirDuasColunas = (l1, v1, l2, v2) => {
-            const colW = (contentW - 6) / 2;
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(8);
-            doc.setTextColor(100, 116, 139);
-            doc.text(l1.toUpperCase(), margin, y);
-            doc.text(l2.toUpperCase(), margin + colW + 6, y);
-            y += 4.5;
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9.5);
-            doc.setTextColor(30, 41, 59);
-            const l1Lines = doc.splitTextToSize(v1 || "—", colW);
-            const l2Lines = doc.splitTextToSize(v2 || "—", colW);
-            const maxH = Math.max(l1Lines.length, l2Lines.length) * 4.5;
-            assegurarEspaco(maxH + 6);
-            doc.text(l1Lines, margin, y);
-            doc.text(l2Lines, margin + colW + 6, y);
-            y += maxH + 4;
-          };
-
-          doc.setFillColor(235, 243, 254);
-          doc.rect(margin, y, contentW, 7, "F");
-          doc.setTextColor(43, 95, 237);
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(9);
-          doc.text("1. METADADOS E ALVO DO PROJETO", margin + 3, y + 5);
-          y += 12;
-          
-          // Formatação correta da data do prazo (DD/MM/YYYY)
-          const rawPrazo = document.getElementById("est_prazo").value;
-          const formatPrazo = rawPrazo ? rawPrazo.split('-').reverse().join('/') : "Não informado";
-
-          imprimirDuasColunas(
-            "Tema do Vídeo",
-            document.getElementById("est_tema").value,
-            "Objetivo Narrativo",
-            document.getElementById("est_objetivo").value ||
-              "Geral / Corporativo",
-          );
-          imprimirDuasColunas(
-            "Estilo Audiovisual",
-            document.getElementById("est_estilo").value,
-            "Formato / Proporção",
-            document.getElementById("est_formato").value,
-          );
-          imprimirDuasColunas(
-            "Canais de Distribuição",
-            document.getElementById("est_veiculacao").value,
-            "Narrador Principal",
-            document.getElementById("est_narrador").value,
-          );
-          imprimirDuasColunas(
-            "Tempo Previsto",
-            document.getElementById("est_tempo").value,
-            "Data Limite (Prazo)",
-            formatPrazo,
-          );
-
-          let txtPaises = [];
-          if (document.getElementById("est_br").checked)
-            txtPaises.push("Brasil");
-          if (document.getElementById("est_eua").checked) txtPaises.push("EUA");
-          imprimirDuasColunas(
-            "Países de Veiculação",
-            txtPaises.join(", "),
-            "",
-            "",
-          );
-
-          y += 4;
-          assegurarEspaco(15);
-          doc.setFillColor(235, 243, 254);
-          doc.rect(margin, y, contentW, 7, "F");
-          doc.setTextColor(43, 95, 237);
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(9);
-          doc.text("2. CRONOGRAMA DE PRODUÇÃO POR CENAS", margin + 3, y + 5);
-          y += 12;
-
-          cenasLocais.forEach((cena, i) => {
-            const campos = [
-              ["Narração/Voz", cena.narracao],
-              ["Lettering", cena.lettering],
-              ["Grifos/Destaques", cena.destaques],
-              ["Cena/Visual", cena.descricao],
-              ["Trilha/Áudio", cena.audio],
-            ];
-
-            let alturaBloco = 8;
-            campos.forEach(([, val]) => {
-              const lines = doc.splitTextToSize(val || "—", contentW - 10);
-              alturaBloco += 3.8 + lines.length * 4.2;
-            });
-
-            assegurarEspaco(alturaBloco + 6);
-
-            doc.setFillColor(248, 250, 252);
-            doc.rect(margin, y, contentW, 6, "F");
-            doc.setTextColor(30, 41, 59);
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(9);
-            doc.text(`CENA ${i + 1}`, margin + 3, y + 4.5);
-            y += 10;
-
-            campos.forEach(([rotulo, valor]) => {
-              doc.setFont("helvetica", "bold");
-              doc.setFontSize(7.5);
-              doc.setTextColor(148, 163, 184);
-              doc.text(rotulo.toUpperCase(), margin + 3, y);
-              y += 3.5;
-              doc.setFont("helvetica", "normal");
-              doc.setFontSize(9);
-              doc.setTextColor(51, 65, 85);
-              const wrapLines = doc.splitTextToSize(valor || "—", contentW - 8);
-              doc.text(wrapLines, margin + 3, y);
-              y += wrapLines.length * 4.2 + 2.5;
-            });
-            y += 2;
-          });
-
-          const obs = document.getElementById("est_observacao").value;
-          if (obs) {
-            assegurarEspaco(25);
-            y += 4;
-            doc.setFillColor(254, 242, 242);
-            doc.rect(margin, y, contentW, 6, "F");
-            doc.setTextColor(224, 41, 71);
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(8);
-            doc.text("OBSERVAÇÕES ADICIONAIS", margin + 3, y + 4.2);
-            y += 9;
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9);
-            doc.setTextColor(51, 65, 85);
-            const wrapObs = doc.splitTextToSize(obs, contentW - 6);
-            doc.text(wrapObs, margin + 3, y);
-            y += wrapObs.length * 4.5 + 4;
-          }
-
-          assegurarEspaco(20);
-          imprimirDuasColunas(
-            "Gatilho Textual Capa",
-            document.getElementById("est_thumb_text").value,
-            "Foco de Produção Arte",
-            document.getElementById("est_thumb_type").value || "Padrão",
-          );
-
-          const totalPages = doc.internal.getNumberOfPages();
-          for (let k = 1; k <= totalPages; k++) {
-            doc.setPage(k);
-            doc.setFontSize(7.5);
-            doc.setTextColor(148, 163, 184);
-            doc.text(
-              `Coco and Luna — Roteiro de vídeo |  Página ${k} de ${totalPages}`,
-              pageW / 2,
-              pageH - margin + 5,
-              { align: "center" },
-            );
-          }
-
-          doc.save(
-            `briefing-tecnico-${(document.getElementById("est_tema").value || "producao").toLowerCase().replace(/[^a-z0-9]/gi, "-")}.pdf`,
-          );
-        } catch (err) {
-          Swal.fire(
-            "Erro",
-            "Houve uma falha no processador jsPDF: " + err.message,
-            "error",
-          );
-        }
-      }
-    </script>
+    <script src="app.js"></script>
   </body>
 </html>
